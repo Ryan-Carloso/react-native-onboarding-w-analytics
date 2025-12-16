@@ -6,17 +6,16 @@ https://github.com/user-attachments/assets/bb51a0c3-15be-42b6-b20d-c33c29b84bc7
 
 ## 🚀 Features
 
-* **Cross-platform** – Works seamlessly on iOS, Android, and Web
-* **Smooth animations** – React Native Reanimated for smooth transitions
-* **Works out of the box** – Just install and use with default styles
-* **Flexible theming and custom components** – Complete control over colors, fonts, and styling
+- **Cross-platform** – Works seamlessly on iOS, Android, and Web
+- **Smooth animations** – React Native Reanimated for smooth transitions
+- **Works out of the box** – Just install and use with default styles
+- **Flexible theming and custom components** – Complete control over colors, fonts, and styling
 
 ## Inspired by [Private Mind App](https://github.com/software-mansion-labs/private-mind)
 
 A private AI app that runs entirely offline on your device, with no data sent to the cloud and no internet connection required. Private Mind represents a new era of AI! Powerful, personal, and completely private.
 
 ![Banner](assets/private-mind.png)
-
 
 ## 📦 Installation
 
@@ -31,11 +30,12 @@ npm install react-native-reanimated react-native-safe-area-context
 ```
 
 Optionally for image support, install one of:
+
 ```sh
 npm install expo-image
 ```
 
-```sh 
+```sh
 npm install react-native-svg
 ```
 
@@ -51,7 +51,7 @@ function MyOnboarding() {
     <Onboarding
       introPanel={{
         title: 'Welcome to My App',
-        subtitle: 'Let\'s get you started',
+        subtitle: "Let's get you started",
         button: 'Get Started',
         image: require('./assets/logo.png'),
       }}
@@ -64,7 +64,7 @@ function MyOnboarding() {
           position: 'top',
         },
         {
-          title: 'Step 2', 
+          title: 'Step 2',
           description: 'Learn about our amazing features',
           buttonLabel: 'Continue',
           image: require('./assets/step2.png'),
@@ -73,7 +73,7 @@ function MyOnboarding() {
       ]}
       onComplete={() => {
         await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
-        console.log('Onboarding completed!')
+        console.log('Onboarding completed!');
       }}
       onSkip={() => console.log('Onboarding skipped')}
       onStepChange={(step) => console.log('Current step:', step)}
@@ -134,10 +134,12 @@ To see all the props and their types, check the [types](src/spill-onboarding/typ
 ### OnboardingProps
 
 #### `introPanel`
+
 **Type:** `OnboardingIntroPanel`  
 **Required** - The welcome screen that users see at the start of the onboarding
 
 The intro panel can be either:
+
 - **Default panel**: Pass an object with `title`, `subtitle`, `button`, `image`
 - **Custom component**: Pass a render function that receives `onPressStart` callback
 
@@ -159,9 +161,10 @@ introPanel={({ onPressStart }) => (
 ![Intro Panel](assets/intro-panel.png)
 
 #### `steps`
+
 **Type:** `OnboardingStep[]`  
 **Required** - Array of onboarding steps to display
-  
+
 ![Step](assets/step.png)
 
 Each step can be either a default text-based step or a fully custom component:
@@ -180,10 +183,10 @@ Each step can be either a default text-based step or a fully custom component:
 // Custom step component
 {
   component: ({ onNext, onBack, isLast }) => (
-    <CustomStepComponent 
-      onNext={onNext} 
-      onBack={onBack} 
-      isLast={isLast} 
+    <CustomStepComponent
+      onNext={onNext}
+      onBack={onBack}
+      isLast={isLast}
       ... other props ...
     />
   ),
@@ -192,8 +195,8 @@ Each step can be either a default text-based step or a fully custom component:
 }
 ```
 
-
 #### `onComplete`
+
 **Type:** `() => void`  
 **Required** - Callback fired when user completes the final step, usually used to save the completion state to the local storage and navigate to the main app.
 
@@ -207,6 +210,7 @@ onComplete={() => {
 ```
 
 #### `onSkip`
+
 **Type:** `() => void`  
 **Optional** - Callback fired when user skips onboarding, usually used to track the skip event and navigate away from the onboarding.
 
@@ -220,6 +224,7 @@ onSkip={() => {
 ```
 
 #### `onStepChange`
+
 **Type:** `(stepIndex: number) => void`  
 **Default:** `undefined` - Callback fired when the active step changes
 
@@ -231,6 +236,7 @@ onStepChange={(stepIndex) => {
 ```
 
 #### `showCloseButton`
+
 **Type:** `boolean`  
 **Default:** `true` - Whether to show the close button in the header
 
@@ -239,6 +245,7 @@ showCloseButton={false} // Hide close button
 ```
 
 #### `showBackButton`
+
 **Type:** `boolean`  
 **Default:** `true` - Whether to show back button on steps (except first step)
 
@@ -249,6 +256,7 @@ showBackButton={false} // Disable back navigation
 ```
 
 #### `wrapInModalOnWeb`
+
 **Type:** `boolean`  
 **Default:** `true` - Whether to wrap the onboarding in a modal on web
 
@@ -259,6 +267,7 @@ wrapInModalOnWeb={false} // Disable modal wrapping
 ```
 
 #### `animationDuration`
+
 **Type:** `number`  
 **Default:** `500` - Animation duration in milliseconds for step transitions
 
@@ -268,6 +277,7 @@ animationDuration={800} // Slower if app is for seniors 👴🏽👵🏼
 ```
 
 #### `colors`
+
 **Type:** `OnboardingColors`  
 **Default:**
 
@@ -288,6 +298,7 @@ colors={{
 ```
 
 #### `fonts`
+
 **Type:** `OnboardingFonts | string`  
 **Default:** `'System'` - Custom font configuration
 
@@ -306,19 +317,21 @@ fonts={{
 ```
 
 #### `background`
+
 **Type:** `() => ReactNode`  
 **Default:** `undefined` - Custom background element rendered behind content
 
 ```tsx
 background={() => (
-  <Image 
-    source={require('./assets/background.png')} 
+  <Image
+    source={require('./assets/background.png')}
     style={StyleSheet.absoluteFillObject}
   />
 )}
 ```
 
 #### `skipButton`
+
 **Type:** `({ onPress }: { onPress: () => void }) => ReactNode`  
 **Default:** X icon - Custom close button renderer
 
@@ -332,18 +345,20 @@ skipButton={({ onPress }) => (
 )}
 ```
 
-
 ## 💡 Best Practices
 
 ### Image Consistency
+
 Use images with the same dimensions for the best visual effect. This prevents layout shifts and creates smooth transitions between steps.
 
 **Image creator**: Use this [Figma Community template](https://www.figma.com/community/file/1556597720381753708) to design consistent onboarding illustrations and export assets with the recommended dimensions.
 
 ### Persistent Storage
+
 Save onboarding completion state to persistent storage (MMKV, AsyncStorage) to prevent users from seeing the onboarding again after completion.
 
 ### Navigation
+
 On completion, navigate users to the main app to provide a smooth transition from onboarding to the core experience.
 
 ## 🤝 Contributing
