@@ -29,6 +29,8 @@ function SpillOnboarding({
   wrapInModalOnWeb = true,
   background,
   skipButton,
+  analyticsProvider,
+  recordEvent,
 }: OnboardingProps) {
   const { theme } = useTheme();
 
@@ -43,8 +45,13 @@ function SpillOnboarding({
     (stepNumber: number) => {
       setStep(stepNumber);
       onStepChangeProps?.(stepNumber);
+
+      if (recordEvent && analyticsProvider) {
+        console.log('evento debug', 'step_change');
+        recordEvent(analyticsProvider, 'step_change', { step: stepNumber });
+      }
     },
-    [onStepChangeProps]
+    [onStepChangeProps, recordEvent, analyticsProvider]
   );
 
   useEffect(() => {
@@ -88,6 +95,10 @@ function SpillOnboarding({
 
   const onNextPress = () => {
     if (step === steps.length - 1) {
+      if (recordEvent && analyticsProvider) {
+        console.log('evento debug', 'complete');
+        recordEvent(analyticsProvider, 'complete');
+      }
       return onComplete();
     }
 

@@ -234,4 +234,21 @@ export interface OnboardingProps {
 
   /** Font family set or a single family name applied where appropriate. */
   fonts?: OnboardingFonts | string;
+
+  /** Configuration object for the analytics provider. */
+  analyticsProvider?: AnalyticsConfig;
+
+  /** Callback function to handle analytics events. */
+  recordEvent?: (
+    config: AnalyticsConfig,
+    event: string,
+    data?: any
+  ) => void | Promise<void>;
+}
+
+export interface AnalyticsConfig {
+  apiKey: string;
+  siteId: string;
+  endpoint?: string;
+  [key: string]: any;
 }
