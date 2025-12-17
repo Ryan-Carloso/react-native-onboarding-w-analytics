@@ -16,6 +16,7 @@ import OnboardingModal from './components/OnboardingModal';
 import { type OnboardingProps } from './types';
 import useMeasureHeight from './hooks/useMeasureHeight';
 import { type Theme } from '../utils/theme';
+import { trackEvent } from './analytics';
 
 function SpillOnboarding({
   animationDuration = 500,
@@ -29,8 +30,7 @@ function SpillOnboarding({
   wrapInModalOnWeb = true,
   background,
   skipButton,
-  analyticsProvider,
-  recordEvent,
+  apiKey,
 }: OnboardingProps) {
   const { theme } = useTheme();
 
@@ -43,15 +43,40 @@ function SpillOnboarding({
 
   const onStepChange = useCallback(
     (stepNumber: number) => {
+      const getStepName = (index: number) => {
+        if (index === -1) {
+          return 'Intro';
+        }
+        const s = steps[index];
+        if (!s) {
+          return 'Unknown';
+        }
+        if ('title' in s && s.title) {
+          return s.title;
+        }
+        return `Step ${index + 1}`;
+      };
+
+      const fromStepName = getStepName(step);
+      const toStepName = getStepName(stepNumber);
+
+      console.log('🔄 Onboarding Step Change:', {
+        from: fromStepName,
+        to: toStepName,
+        index: stepNumber,
+      });
+
       setStep(stepNumber);
       onStepChangeProps?.(stepNumber);
 
-      if (recordEvent && analyticsProvider) {
-        console.log('evento debug', 'step_change');
-        recordEvent(analyticsProvider, 'step_change', { step: stepNumber });
-      }
+      trackEvent(apiKey, 'step_change', {
+        from_index: step,
+        to_index: stepNumber,
+        from_step: fromStepName,
+        to_step: toStepName,
+      });
     },
-    [onStepChangeProps, recordEvent, analyticsProvider]
+    [onStepChangeProps, apiKey, step, steps]
   );
 
   useEffect(() => {
@@ -95,10 +120,7 @@ function SpillOnboarding({
 
   const onNextPress = () => {
     if (step === steps.length - 1) {
-      if (recordEvent && analyticsProvider) {
-        console.log('evento debug', 'complete');
-        recordEvent(analyticsProvider, 'complete');
-      }
+      trackEvent(apiKey, 'complete');
       return onComplete();
     }
 

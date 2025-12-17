@@ -169,5 +169,9 @@
     "languages": "js",
     "type": "library",
     "version": "0.54.3"
+  },
+  "dependencies": {
+    "expo-constants": "^18.0.12",
+    "expo-localization": "^17.0.8"
   }
 }
