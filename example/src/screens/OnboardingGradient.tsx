@@ -214,6 +214,7 @@ export default function OnboardingGradient({ navigation }: Props) {
       showCloseButton
       showBackButton
       skipButton={({ onPress }) => <SkipButton onPress={onPress} />}
+      apiKey="apiKey-websiteTRACKER"
     />
   );
 }

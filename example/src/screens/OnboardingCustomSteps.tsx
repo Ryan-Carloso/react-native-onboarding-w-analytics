@@ -112,6 +112,7 @@ export default function OnboardingCustomSteps({ navigation }: Props) {
       onStepChange={() => {}}
       showCloseButton
       showBackButton
+      apiKey="apiKey-websiteTRACKER"
     />
   );
 }

@@ -1,7 +1,7 @@
 {
-  "name": "@blazejkustra/react-native-onboarding",
+  "name": "rn-onboarding-analytics",
   "version": "1.0.0",
-  "description": "Onboarding/tutorial flow for React Native.",
+  "description": "Onboarding/tutorial flow for React Native with analytics.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -32,10 +32,9 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace @blazejkustra/react-native-onboarding-example",
     "test": "jest --passWithNoTests",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint:fix": "eslint \"**/*.{js,ts,tsx}\" --fix",
     "clean": "del-cli lib",
     "prepare": "bob build",
     "prepack": "sed -i '' '1s|.*|![Banner](assets/banner.png)|' README.md",
@@ -45,18 +44,19 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "analytics"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/software-mansion-labs/react-native-onboarding.git"
+    "url": "git+https://github.com/Ryan-Carloso/react-native-onboarding-w-analytics.git"
   },
-  "author": "Blazej Kustra <kustrablazej@gmail.com> (https://github.com/blazejkustra)",
+  "author": "Ryan Carloso <carlosoryan@gmail.com> (https://github.com/Ryan-Carloso)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/software-mansion-labs/react-native-onboarding/issues"
+    "url": "https://github.com/Ryan-Carloso/react-native-onboarding-w-analytics/issues"
   },
-  "homepage": "https://github.com/software-mansion-labs/react-native-onboarding#readme",
+  "homepage": "https://github.com/Ryan-Carloso/react-native-onboarding-w-analytics#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

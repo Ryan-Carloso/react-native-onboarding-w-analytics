@@ -2,17 +2,15 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as Localization from 'expo-localization';
 
+// TODO: need to get an better domain
 const API_URL = 'https://api.freesupabase.shop/api/track';
-
-// NOTE: Remove this mock key before deploying to production
-const MOCK_API_KEY = 'app-6fe754ea-0671-4b2b-b2ab-2eb30d4af9fc';
 
 export const trackEvent = async (
   apiKey: string | undefined,
   eventType: string,
   metaData: any = {}
 ) => {
-  const token = apiKey || MOCK_API_KEY;
+  const token = apiKey;
   const appName =
     Constants.expoConfig?.name ||
     Constants.manifest?.name ||

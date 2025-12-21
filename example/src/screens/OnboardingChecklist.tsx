@@ -77,6 +77,7 @@ export default function OnboardingChecklist() {
       showCloseButton={true}
       showBackButton={true}
       wrapInModalOnWeb={true}
+      apiKey="apiKey-websiteTRACKER"
       animationDuration={500}
       colors={{
         background: {
