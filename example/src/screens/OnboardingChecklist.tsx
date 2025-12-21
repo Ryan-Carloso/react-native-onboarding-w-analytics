@@ -123,8 +123,12 @@ export default function OnboardingChecklist() {
         ],
         button: 'Continue',
       }}
-      onComplete={() => {
-        console.log('onComplete clicked');
+      onComplete={(planId) => {
+        if (planId) {
+          console.log('onComplete clicked with plan:', planId);
+        } else {
+          console.log('onComplete clicked without plan');
+        }
       }}
       onSkip={() => {}}
       showCloseButton={true}

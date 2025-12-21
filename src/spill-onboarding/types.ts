@@ -206,7 +206,7 @@ export interface OnboardingProps {
   steps: OnboardingStep[];
 
   /** Called when the user completes the final step. */
-  onComplete: () => void;
+  onComplete: (planId?: string) => void;
 
   /** Called when the user skips the onboarding. */
   onSkip?: () => void;

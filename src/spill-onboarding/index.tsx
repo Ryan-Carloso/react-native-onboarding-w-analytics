@@ -177,7 +177,7 @@ function SpillOnboarding({
   const onPaywallContinue = (planId: string) => {
     trackEvent(apiKey, 'paywall_select', { plan_id: planId }, isDev);
     trackEvent(apiKey, 'complete', { plan_id: planId }, isDev);
-    onComplete();
+    onComplete(planId);
   };
 
   const renderPaywallPanel = () => {
