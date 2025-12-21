@@ -51,12 +51,12 @@ import Onboarding from 'rn-onboarding-analytics';
 function MyOnboarding() {
   return (
     <Onboarding
+      apiKey="your-key"
       introPanel={{
         title: 'Welcome to My App',
         subtitle: "Let's get you started",
         button: 'Get Started',
         image: require('./assets/logo.png'),
-        apikey: 'your-key'
       }}
       steps={[
         {
@@ -424,12 +424,12 @@ import Onboarding from 'rn-onboarding-analytics';
 function MyOnboarding() {
   return (
     <Onboarding
+      apiKey="your-key"
       introPanel={{
         title: 'Welcome to My App',
         subtitle: "Let's get you started",
         button: 'Get Started',
         image: require('./assets/logo.png'),
-        apikey: 'your-key'
       }}
       steps={[
         {
