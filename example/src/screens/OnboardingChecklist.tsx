@@ -77,6 +77,19 @@ export default function OnboardingChecklist() {
         title: 'Unlock Premium Features',
         subtitle: 'Get unlimited lists and more',
         image: require('../../assets/checklist/create.png'),
+        helperTextContinue: '7 days free',
+        onRestorePurchase: {
+          text: 'Restore',
+          onPress: () => console.log('Restore Purchase clicked'),
+        },
+        onTerms: {
+          text: 'Terms',
+          onPress: () => console.log('Terms clicked'),
+        },
+        onPrivacy: {
+          text: 'Privacy',
+          onPress: () => console.log('Privacy clicked'),
+        },
         plans: [
           {
             id: 'weekly',
@@ -110,7 +123,9 @@ export default function OnboardingChecklist() {
         ],
         button: 'Continue',
       }}
-      onComplete={() => {}}
+      onComplete={() => {
+        console.log('onComplete clicked');
+      }}
       onSkip={() => {}}
       showCloseButton={true}
       showBackButton={true}

@@ -6,12 +6,15 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useTheme } from '../../utils/ThemeContext';
 import type { Theme } from '../../utils/theme';
 import PrimaryButton from '../buttons/PrimaryButton';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
 import type { OnboardingPaywallPanelProps } from '../types';
+
+const { height: screenHeight } = Dimensions.get('window');
 
 function OnboardingPaywallPanel({
   onPressContinue,
@@ -20,6 +23,10 @@ function OnboardingPaywallPanel({
   button,
   image,
   plans,
+  helperTextContinue,
+  onRestorePurchase,
+  onTerms,
+  onPrivacy,
 }: OnboardingPaywallPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -125,26 +132,71 @@ function OnboardingPaywallPanel({
     return button({ onPress: handlePress });
   };
 
+  const renderFooterLinks = () => {
+    if (!onRestorePurchase && !onTerms && !onPrivacy) return null;
+
+    return (
+      <View style={styles.footerLinksContainer}>
+        {onRestorePurchase && (
+          <TouchableOpacity onPress={onRestorePurchase.onPress}>
+            <Text style={styles.footerLinkText}>{onRestorePurchase.text}</Text>
+          </TouchableOpacity>
+        )}
+
+        {onRestorePurchase && (onTerms || onPrivacy) && (
+          <Text style={styles.footerLinkSeparator}>•</Text>
+        )}
+
+        {onTerms && (
+          <TouchableOpacity onPress={onTerms.onPress}>
+            <Text style={styles.footerLinkText}>{onTerms.text}</Text>
+          </TouchableOpacity>
+        )}
+
+        {onTerms && onPrivacy && (
+          <Text style={styles.footerLinkSeparator}>•</Text>
+        )}
+
+        {onPrivacy && (
+          <TouchableOpacity onPress={onPrivacy.onPress}>
+            <Text style={styles.footerLinkText}>{onPrivacy.text}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      bounces={false}
     >
       {typeof image === 'function'
         ? image()
-        : image && <Image source={image} style={styles.image} />}
+        : image && (
+            <Image source={image} style={styles.image} resizeMode="cover" />
+          )}
 
-      <View style={styles.headerContainer}>
-        {renderTitle()}
-        {renderSubtitle()}
+      <View style={styles.contentWrapper}>
+        <View style={styles.headerContainer}>
+          {renderTitle()}
+          {renderSubtitle()}
+        </View>
+
+        {renderFeatures()}
+
+        {renderPlans()}
+
+        {helperTextContinue && (
+          <Text style={styles.helperText}>{helperTextContinue}</Text>
+        )}
+
+        {renderButton()}
+
+        {renderFooterLinks()}
       </View>
-
-      {renderFeatures()}
-
-      {renderPlans()}
-
-      {renderButton()}
     </ScrollView>
   );
 }
@@ -155,18 +207,28 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      marginTop: 16,
+      backgroundColor: theme.bg.secondary,
     },
     contentContainer: {
       paddingBottom: 40,
     },
+    contentWrapper: {
+      paddingHorizontal: 16,
+      marginTop: -32,
+      paddingTop: 32,
+      borderTopLeftRadius: 32,
+      borderTopRightRadius: 32,
+      backgroundColor: theme.bg.secondary,
+    },
     image: {
       alignSelf: 'center',
-      marginBottom: 20,
+      width: '100%',
+      height: screenHeight * 0.3,
     },
     headerContainer: {
       alignItems: 'center',
       marginBottom: 24,
+      marginTop: 8,
     },
     text: {
       fontSize: fontSizes.xxl,
@@ -174,54 +236,65 @@ const createStyles = (theme: Theme) =>
       textAlign: 'center',
     },
     line1: {
-      marginTop: 20,
       color: theme.text.primary,
     },
     line2: {
-      color: theme.bg.primary,
+      marginTop: 8,
+      color: theme.text.secondary,
+      fontSize: fontSizes.md,
+      lineHeight: lineHeights.md,
     },
     titleText: {
       fontFamily: theme.fonts.introTitle,
+      fontWeight: 'bold',
     },
     subtitleText: {
       fontFamily: theme.fonts.introSubtitle,
     },
     featuresContainer: {
       marginBottom: 24,
-      paddingHorizontal: 16,
+      paddingHorizontal: 8,
     },
     featureRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 8,
+      marginBottom: 12,
     },
     checkIcon: {
       color: theme.bg.accent,
       fontSize: fontSizes.lg,
-      marginRight: 8,
+      marginRight: 12,
       fontWeight: 'bold',
     },
     featureText: {
       color: theme.text.primary,
       fontSize: fontSizes.md,
+      fontWeight: '500',
     },
     plansContainer: {
       gap: 12,
-      marginBottom: 32,
+      marginBottom: 24,
     },
     planCard: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: 16,
-      borderRadius: 12,
+      borderRadius: 16,
       backgroundColor: theme.bg.secondary,
       borderWidth: 1,
       borderColor: theme.bg.label,
+      // Shadow for elevation
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
     },
     planCardSelected: {
       borderColor: theme.bg.accent,
-      backgroundColor: theme.bg.accent + '10', // 10% opacity
+      backgroundColor: theme.bg.secondary,
+      borderWidth: 2,
     },
     planTitle: {
       fontSize: fontSizes.md,
@@ -229,7 +302,8 @@ const createStyles = (theme: Theme) =>
       color: theme.text.primary,
     },
     planTitleSelected: {
-      color: theme.bg.accent,
+      color: theme.text.primary,
+      fontWeight: '700',
     },
     planInterval: {
       fontSize: fontSizes.sm,
@@ -237,7 +311,7 @@ const createStyles = (theme: Theme) =>
       marginTop: 2,
     },
     planIntervalSelected: {
-      color: theme.bg.accent,
+      color: theme.text.secondary,
     },
     planPrice: {
       fontSize: fontSizes.lg,
@@ -246,5 +320,27 @@ const createStyles = (theme: Theme) =>
     },
     planPriceSelected: {
       color: theme.bg.accent,
+    },
+    helperText: {
+      textAlign: 'center',
+      color: theme.text.secondary,
+      fontSize: fontSizes.sm,
+      marginBottom: 12,
+      fontWeight: '500',
+    },
+    footerLinksContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 24,
+      gap: 8,
+    },
+    footerLinkText: {
+      fontSize: fontSizes.md,
+      color: theme.text.secondary,
+    },
+    footerLinkSeparator: {
+      fontSize: fontSizes.xs,
+      color: theme.text.secondary,
     },
   });

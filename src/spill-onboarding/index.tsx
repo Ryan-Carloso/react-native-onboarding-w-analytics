@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../utils/ThemeContext';
 import OnboardingIntroPanel from './components/OnboardingIntroPanel';
+import OnboardingPaywallPanel from './components/OnboardingPaywallPanel';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import OnboardingStepPanel from './components/OnboardingStepPanel';
 import OnboardingStepContainer from './components/OnboardingStepContainer';
@@ -32,6 +33,7 @@ function SpillOnboarding({
   skipButton,
   apiKey,
   isDev,
+  paywallPanel: paywallPanelProps,
 }: OnboardingProps) {
   const { theme } = useTheme();
 
@@ -41,12 +43,16 @@ function SpillOnboarding({
   const [step, setStep] = useState(-1);
   const currentStep = step >= 0 ? steps[step] : undefined;
   const firstStep = steps[0];
+  const isPaywall = step === steps.length;
 
   const onStepChange = useCallback(
     (stepNumber: number) => {
       const getStepName = (index: number) => {
         if (index === -1) {
           return 'Intro';
+        }
+        if (index === steps.length) {
+          return 'Paywall';
         }
         const s = steps[index];
         if (!s) {
@@ -126,6 +132,10 @@ function SpillOnboarding({
 
   const onNextPress = () => {
     if (step === steps.length - 1) {
+      if (paywallPanelProps) {
+        onStepChange(steps.length);
+        return;
+      }
       trackEvent(apiKey, 'complete', {}, isDev);
       return onComplete();
     }
@@ -164,6 +174,27 @@ function SpillOnboarding({
     );
   };
 
+  const onPaywallContinue = (planId: string) => {
+    trackEvent(apiKey, 'paywall_select', { plan_id: planId }, isDev);
+    trackEvent(apiKey, 'complete', { plan_id: planId }, isDev);
+    onComplete();
+  };
+
+  const renderPaywallPanel = () => {
+    if (!paywallPanelProps) return null;
+
+    if (typeof paywallPanelProps === 'function') {
+      return paywallPanelProps({ onPressContinue: onPaywallContinue });
+    }
+
+    return (
+      <OnboardingPaywallPanel
+        onPressContinue={onPaywallContinue}
+        {...paywallPanelProps}
+      />
+    );
+  };
+
   const renderStepContent = () => {
     if (!currentStep) {
       return null;
@@ -191,12 +222,17 @@ function SpillOnboarding({
   };
 
   const currentStepImage: ImageSourcePropType | undefined = useMemo(() => {
+    if (isPaywall) {
+      // Paywall image is rendered inside the panel scrollview
+      return undefined;
+    }
+
     if (!currentStep) {
       return firstStep?.image;
     }
 
     return currentStep.image;
-  }, [currentStep, firstStep?.image]);
+  }, [currentStep, firstStep?.image, isPaywall]);
 
   const onboardingContent = (
     <View style={styles.container} ref={screen.ref}>
@@ -216,15 +252,19 @@ function SpillOnboarding({
         background={background}
       />
 
-      <OnboardingStepContainer
-        currentStep={currentStep}
-        animationDuration={animationDuration}
-        showCloseButton={showCloseButton}
-        renderStepContent={renderStepContent}
-        onSkip={onSkip}
-        ref={stepPanel.ref}
-        skipButton={skipButton}
-      />
+      {isPaywall ? (
+        <View style={styles.fullScreenPanel}>{renderPaywallPanel()}</View>
+      ) : (
+        <OnboardingStepContainer
+          currentStep={currentStep}
+          animationDuration={animationDuration}
+          showCloseButton={showCloseButton}
+          renderStepContent={renderStepContent}
+          onSkip={onSkip}
+          ref={stepPanel.ref}
+          skipButton={skipButton}
+        />
+      )}
     </View>
   );
 
@@ -253,5 +293,9 @@ const createStyles = (theme: Theme) =>
       bottom: 0,
       left: 0,
       right: 0,
+    },
+    fullScreenPanel: {
+      flex: 1,
+      zIndex: 10,
     },
   });

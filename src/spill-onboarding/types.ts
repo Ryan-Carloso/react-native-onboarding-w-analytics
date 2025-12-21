@@ -285,6 +285,18 @@ export interface OnboardingPaywallPanelProps {
 
   /** Optional image shown on the paywall panel. */
   image?: ImageSourcePropType | (() => ReactNode);
+
+  /** Helper text displayed above the continue button. */
+  helperTextContinue?: string;
+
+  /** Link for restore purchase action. */
+  onRestorePurchase?: { text?: string; onPress: () => void };
+
+  /** Link for terms of service action. */
+  onTerms?: { text?: string; onPress: () => void };
+
+  /** Link for privacy policy action. */
+  onPrivacy?: { text?: string; onPress: () => void };
 }
 
 type OnboardingPaywallPanelConfig =
