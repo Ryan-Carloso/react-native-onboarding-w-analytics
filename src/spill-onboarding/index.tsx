@@ -31,6 +31,7 @@ function SpillOnboarding({
   background,
   skipButton,
   apiKey,
+  isDev,
 }: OnboardingProps) {
   const { theme } = useTheme();
 
@@ -69,14 +70,19 @@ function SpillOnboarding({
       setStep(stepNumber);
       onStepChangeProps?.(stepNumber);
 
-      trackEvent(apiKey, 'step_change', {
-        from_index: step,
-        to_index: stepNumber,
-        from_step: fromStepName,
-        to_step: toStepName,
-      });
+      trackEvent(
+        apiKey,
+        'step_change',
+        {
+          from_index: step,
+          to_index: stepNumber,
+          from_step: fromStepName,
+          to_step: toStepName,
+        },
+        isDev
+      );
     },
-    [onStepChangeProps, apiKey, step, steps]
+    [onStepChangeProps, apiKey, step, steps, isDev]
   );
 
   useEffect(() => {
@@ -120,7 +126,7 @@ function SpillOnboarding({
 
   const onNextPress = () => {
     if (step === steps.length - 1) {
-      trackEvent(apiKey, 'complete');
+      trackEvent(apiKey, 'complete', {}, isDev);
       return onComplete();
     }
 

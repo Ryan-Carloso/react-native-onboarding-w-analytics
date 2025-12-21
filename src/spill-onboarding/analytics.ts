@@ -8,9 +8,9 @@ const API_URL = 'https://api.freesupabase.shop/api/track';
 export const trackEvent = async (
   apiKey: string | undefined,
   eventType: string,
-  metaData: any = {}
+  metaData: any = {},
+  isDev: boolean = false
 ) => {
-  const token = apiKey;
   const appName =
     Constants.expoConfig?.name ||
     Constants.manifest?.name ||
@@ -25,7 +25,7 @@ export const trackEvent = async (
     language: primaryLocale?.languageCode,
   };
 
-  if (!token) {
+  if (!isDev && !apiKey) {
     console.error(
       JSON.stringify({
         error: 'Go to `https://freesupabase.shop/docs` to get an app token',
@@ -35,12 +35,25 @@ export const trackEvent = async (
   }
 
   const payload = {
-    app_id: token,
+    app_id: apiKey,
     eventType,
     userAgent: `React Native (${Platform.OS})`,
     sourceUrl: appName,
     metaData: extendedMetaData,
   };
+
+  if (isDev) {
+    console.log(
+      '🚧 [Dev Mode] Analytics Event (Not Sent):',
+      JSON.stringify(payload, null, 2)
+    );
+    return;
+  }
+
+  if (!apiKey) {
+    console.log('⚠️ Analytics: No API Key provided, event not sent.');
+    return;
+  }
 
   console.log('📡 Sending Analytics Event:', JSON.stringify(payload, null, 2));
 
@@ -49,7 +62,7 @@ export const trackEvent = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify(payload),
     });

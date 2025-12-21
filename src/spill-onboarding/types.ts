@@ -237,7 +237,60 @@ export interface OnboardingProps {
 
   /**
    * API Key for analytics.
-   * Required to enable analytics tracking.
+   * Optional. If not provided, analytics will be disabled.
    */
-  apiKey: string;
+  apiKey?: string;
+
+  /**
+   * If true, analytics events will be logged to console but not sent to the server.
+   * Useful for development.
+   */
+  isDev?: boolean;
+
+  /**
+   * Optional Paywall panel content.
+   * If provided, it will be shown after the last step.
+   */
+  paywallPanel?: OnboardingPaywallPanelConfig;
 }
+
+export interface PaywallPlan {
+  id: string;
+  title: string;
+  price: string;
+  interval?: string;
+  features?: string[];
+}
+
+/**
+ * Props for the paywall panel.
+ */
+export interface OnboardingPaywallPanelProps {
+  /** Callback invoked when the user taps the main action button. */
+  onPressContinue: (planId: string) => void;
+
+  /** Title content. */
+  title?: string | ReactNode;
+
+  /** Subtitle content. */
+  subtitle?: string | ReactNode;
+
+  /** List of plans to display. */
+  plans: PaywallPlan[];
+
+  /**
+   * Button content. Either a simple string label or a render function.
+   */
+  button: string | (({ onPress }: { onPress: () => void }) => ReactNode);
+
+  /** Optional image shown on the paywall panel. */
+  image?: ImageSourcePropType | (() => ReactNode);
+}
+
+type OnboardingPaywallPanelConfig =
+  | Omit<OnboardingPaywallPanelProps, 'onPressContinue'>
+  | (({
+      onPressContinue,
+    }: {
+      onPressContinue: (planId: string) => void;
+    }) => ReactNode);

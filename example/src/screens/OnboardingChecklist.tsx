@@ -1,4 +1,4 @@
-import Onboarding from '@blazejkustra/react-native-onboarding';
+import Onboarding from '../../../src/spill-onboarding';
 import { type ImageSourcePropType } from 'react-native';
 import type { OnboardingStep } from '../../../src/spill-onboarding/types';
 
@@ -66,12 +66,50 @@ export default function OnboardingChecklist() {
 
   return (
     <Onboarding
+      isDev={true}
       introPanel={{
         title: 'The Right Way to do',
         subtitle: 'Shopping lists',
         button: 'Get Started',
       }}
       steps={steps}
+      paywallPanel={{
+        title: 'Unlock Premium Features',
+        subtitle: 'Get unlimited lists and more',
+        image: require('../../assets/checklist/create.png'),
+        plans: [
+          {
+            id: 'weekly',
+            title: 'Weekly',
+            price: '$2.99',
+            interval: '/ week',
+            features: ['Unlimited lists', 'Priority support', 'No ads'],
+          },
+          {
+            id: 'monthly',
+            title: 'Monthly',
+            price: '$9.99',
+            interval: '/ month',
+            features: [
+              'Unlimited lists',
+              'Priority support',
+              'No ads',
+              'Cloud backup',
+            ],
+          },
+          {
+            id: 'lifetime',
+            title: 'Lifetime',
+            price: '$49.99',
+            features: [
+              'All monthly features',
+              'One-time payment',
+              'Lifetime access',
+            ],
+          },
+        ],
+        button: 'Continue',
+      }}
       onComplete={() => {}}
       onSkip={() => {}}
       showCloseButton={true}
