@@ -230,7 +230,10 @@ export interface OnboardingProps {
   skipButton?: ({ onPress }: { onPress: () => void }) => ReactNode;
 
   /** Theme colors to use for styling. */
-  colors?: OnboardingColors;
+  theme?: 'dark' | 'light';
+
+  /** Theme colors to use for styling. */
+  colors?: Partial<OnboardingColors>;
 
   /** Font family set or a single family name applied where appropriate. */
   fonts?: OnboardingFonts | string;

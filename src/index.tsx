@@ -12,12 +12,12 @@ import SpillOnboarding from './spill-onboarding';
 import { Platform } from 'react-native';
 import React from 'react';
 
-function Onboarding({ colors, fonts, ...props }: OnboardingProps) {
+function Onboarding({ colors, fonts, theme, ...props }: OnboardingProps) {
   const SafeArea = Platform.OS === 'web' ? React.Fragment : SafeAreaProvider;
 
   return (
     <SafeArea>
-      <ThemeProvider colors={colors} fonts={fonts}>
+      <ThemeProvider colors={colors} fonts={fonts} theme={theme}>
         <SpillOnboarding {...props} />
       </ThemeProvider>
     </SafeArea>

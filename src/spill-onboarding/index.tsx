@@ -169,7 +169,11 @@ function SpillOnboarding({
         title={introPanelProps.title}
         subtitle={introPanelProps.subtitle}
         button={introPanelProps.button}
-        image={introPanelProps.image}
+        image={
+          typeof introPanelProps.image === 'function'
+            ? introPanelProps.image
+            : undefined
+        }
       />
     );
   };
@@ -228,11 +232,18 @@ function SpillOnboarding({
     }
 
     if (!currentStep) {
+      if (
+        typeof introPanelProps !== 'function' &&
+        introPanelProps.image &&
+        typeof introPanelProps.image !== 'function'
+      ) {
+        return introPanelProps.image;
+      }
       return firstStep?.image;
     }
 
     return currentStep.image;
-  }, [currentStep, firstStep?.image, isPaywall]);
+  }, [currentStep, firstStep?.image, isPaywall, introPanelProps]);
 
   const onboardingContent = (
     <View style={styles.container} ref={screen.ref}>

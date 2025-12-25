@@ -167,37 +167,43 @@ function OnboardingPaywallPanel({
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-      bounces={false}
-    >
-      {typeof image === 'function'
-        ? image()
-        : image && (
-            <Image source={image} style={styles.image} resizeMode="cover" />
-          )}
-
-      <View style={styles.contentWrapper}>
-        <View style={styles.headerContainer}>
-          {renderTitle()}
-          {renderSubtitle()}
-        </View>
-
-        {renderFeatures()}
-
-        {renderPlans()}
-
-        {helperTextContinue && (
-          <Text style={styles.helperText}>{helperTextContinue}</Text>
-        )}
-
-        {renderButton()}
-
-        {renderFooterLinks()}
+    <View style={styles.mainContainer}>
+      <View style={styles.headerImageContainer}>
+        {typeof image === 'function'
+          ? image()
+          : image && (
+              <Image source={image} style={styles.image} resizeMode="cover" />
+            )}
       </View>
-    </ScrollView>
+
+      <View style={styles.sheetContainer}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <View style={styles.contentWrapper}>
+            <View style={styles.headerContainer}>
+              {renderTitle()}
+              {renderSubtitle()}
+            </View>
+
+            {renderFeatures()}
+
+            {renderPlans()}
+
+            {helperTextContinue && (
+              <Text style={styles.helperText}>{helperTextContinue}</Text>
+            )}
+
+            {renderButton()}
+
+            {renderFooterLinks()}
+          </View>
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
@@ -205,25 +211,35 @@ export default OnboardingPaywallPanel;
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    container: {
+    mainContainer: {
       flex: 1,
       backgroundColor: theme.bg.secondary,
+    },
+    headerImageContainer: {
+      height: screenHeight * 0.3,
+      width: '100%',
+    },
+    sheetContainer: {
+      flex: 1,
+      marginTop: -32,
+      backgroundColor: theme.bg.secondary,
+      borderTopLeftRadius: 32,
+      borderTopRightRadius: 32,
+      overflow: 'hidden',
+    },
+    container: {
+      flex: 1,
     },
     contentContainer: {
       paddingBottom: 40,
     },
     contentWrapper: {
       paddingHorizontal: 16,
-      marginTop: -32,
       paddingTop: 32,
-      borderTopLeftRadius: 32,
-      borderTopRightRadius: 32,
-      backgroundColor: theme.bg.secondary,
     },
     image: {
-      alignSelf: 'center',
       width: '100%',
-      height: screenHeight * 0.3,
+      height: '100%',
     },
     headerContainer: {
       alignItems: 'center',

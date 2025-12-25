@@ -1,6 +1,6 @@
 import type { EdgeInsets } from 'react-native-safe-area-context';
 
-export const defaultTheme = {
+export const LightTheme = {
   bg: {
     primary: '#007AFF',
     secondary: '#FFFFFF',
@@ -24,6 +24,33 @@ export const defaultTheme = {
     secondaryButton: 'System',
   },
 };
+
+export const DarkTheme = {
+  bg: {
+    primary: '#0A84FF',
+    secondary: '#000000',
+    label: '#1C1C1E',
+    accent: '#FFFFFF',
+  },
+  text: {
+    primary: '#FFFFFF',
+    secondary: '#8E8E93',
+    contrast: '#000000',
+  },
+  fonts: {
+    introTitle: 'System',
+    introSubtitle: 'System',
+    introButton: 'System',
+    stepLabel: 'System',
+    stepTitle: 'System',
+    stepDescription: 'System',
+    stepButton: 'System',
+    primaryButton: 'System',
+    secondaryButton: 'System',
+  },
+};
+
+export const defaultTheme = LightTheme;
 
 export type ThemeColors = typeof defaultTheme;
 export type Theme = ThemeColors & { insets: EdgeInsets };

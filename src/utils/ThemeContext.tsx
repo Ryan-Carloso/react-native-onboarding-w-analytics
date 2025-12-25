@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import { defaultTheme, type Theme } from './theme';
+import { defaultTheme, type Theme, DarkTheme, LightTheme } from './theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   type OnboardingColors,
@@ -15,18 +15,30 @@ const ThemeContext = createContext<{ theme: Theme }>({
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  colors?: OnboardingColors;
+  theme?: 'dark' | 'light';
+  colors?: Partial<OnboardingColors>;
   fonts?: OnboardingFonts | string;
 }
 
 export default function ThemeProvider({
   children,
+  theme: themePreset = 'light',
   colors: customColors,
   fonts: customFonts,
 }: ThemeProviderProps) {
   const insets = useSafeAreaInsets();
 
   const theme: Theme = useMemo(() => {
+    const baseTheme = themePreset === 'dark' ? DarkTheme : LightTheme;
+
+    console.log('🎨 ThemeProvider:', {
+      preset: themePreset,
+      isDark: themePreset === 'dark',
+      baseBg: baseTheme.bg.primary,
+      baseText: baseTheme.text.primary,
+      customColors,
+    });
+
     const fonts =
       typeof customFonts === 'string'
         ? {
@@ -41,41 +53,37 @@ export default function ThemeProvider({
             secondaryButton: customFonts,
           }
         : {
-            introTitle:
-              customFonts?.introTitle ?? defaultTheme.fonts.introTitle,
+            introTitle: customFonts?.introTitle ?? baseTheme.fonts.introTitle,
             introSubtitle:
-              customFonts?.introSubtitle ?? defaultTheme.fonts.introSubtitle,
+              customFonts?.introSubtitle ?? baseTheme.fonts.introSubtitle,
             introButton:
-              customFonts?.introButton ?? defaultTheme.fonts.introButton,
-            stepLabel: customFonts?.stepLabel ?? defaultTheme.fonts.stepLabel,
-            stepTitle: customFonts?.stepTitle ?? defaultTheme.fonts.stepTitle,
+              customFonts?.introButton ?? baseTheme.fonts.introButton,
+            stepLabel: customFonts?.stepLabel ?? baseTheme.fonts.stepLabel,
+            stepTitle: customFonts?.stepTitle ?? baseTheme.fonts.stepTitle,
             stepDescription:
-              customFonts?.stepDescription ??
-              defaultTheme.fonts.stepDescription,
-            stepButton:
-              customFonts?.stepButton ?? defaultTheme.fonts.stepButton,
+              customFonts?.stepDescription ?? baseTheme.fonts.stepDescription,
+            stepButton: customFonts?.stepButton ?? baseTheme.fonts.stepButton,
             primaryButton:
-              customFonts?.primaryButton ?? defaultTheme.fonts.primaryButton,
+              customFonts?.primaryButton ?? baseTheme.fonts.primaryButton,
             secondaryButton:
-              customFonts?.secondaryButton ??
-              defaultTheme.fonts.secondaryButton,
+              customFonts?.secondaryButton ?? baseTheme.fonts.secondaryButton,
           };
 
     const { background, text: textColors } = customColors ?? {};
     const bg = {
-      primary: background?.primary ?? defaultTheme.bg.primary,
-      secondary: background?.secondary ?? defaultTheme.bg.secondary,
-      label: background?.label ?? defaultTheme.bg.label,
-      accent: background?.accent ?? defaultTheme.bg.accent,
+      primary: background?.primary ?? baseTheme.bg.primary,
+      secondary: background?.secondary ?? baseTheme.bg.secondary,
+      label: background?.label ?? baseTheme.bg.label,
+      accent: background?.accent ?? baseTheme.bg.accent,
     };
     const text = {
-      primary: textColors?.primary ?? defaultTheme.text.primary,
-      secondary: textColors?.secondary ?? defaultTheme.text.secondary,
-      contrast: textColors?.contrast ?? defaultTheme.text.contrast,
+      primary: textColors?.primary ?? baseTheme.text.primary,
+      secondary: textColors?.secondary ?? baseTheme.text.secondary,
+      contrast: textColors?.contrast ?? baseTheme.text.contrast,
     };
 
     return { bg, text, fonts, insets };
-  }, [insets, customColors, customFonts]);
+  }, [insets, themePreset, customColors, customFonts]);
 
   return (
     <ThemeContext.Provider value={{ theme }}>{children}</ThemeContext.Provider>

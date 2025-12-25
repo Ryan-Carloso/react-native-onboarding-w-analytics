@@ -1,12 +1,19 @@
-import Onboarding from '../../../../src/spill-onboarding';
-import { theme } from './theme';
+import Onboarding from '../../../../src';
 import { steps } from './pages';
 
 export default function OnboardingChecklist() {
   return (
     <Onboarding
       isDev={true}
+      onSkip={() => {}}
+      showCloseButton={true}
+      showBackButton={true}
+      wrapInModalOnWeb={true}
+      apiKey="apiKey-websiteTRACKER"
+      animationDuration={500}
+      theme="dark"
       introPanel={{
+        image: require('../../../assets/checklist/share.png'),
         title: 'The Right Way to do',
         subtitle: 'Shopping lists',
         button: 'Get Started',
@@ -68,25 +75,6 @@ export default function OnboardingChecklist() {
         } else {
           console.log('onComplete clicked without plan');
         }
-      }}
-      onSkip={() => {}}
-      showCloseButton={true}
-      showBackButton={true}
-      wrapInModalOnWeb={true}
-      apiKey="apiKey-websiteTRACKER"
-      animationDuration={500}
-      colors={{
-        background: {
-          primary: theme.colors.buttonPurple,
-          secondary: theme.colors.background,
-          label: theme.colors.secondaryAccent,
-          accent: theme.colors.violet,
-        },
-        text: {
-          primary: theme.colors.primaryText,
-          secondary: theme.colors.secondaryText,
-          contrast: theme.colors.white,
-        },
       }}
     />
   );
