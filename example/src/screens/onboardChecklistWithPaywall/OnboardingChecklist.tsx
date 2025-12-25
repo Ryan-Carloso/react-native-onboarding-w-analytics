@@ -1,4 +1,4 @@
-import Onboarding from '../../../../src';
+import Onboarding from 'rn-onboarding-analytics';
 import { steps } from './pages';
 import { ExamplePaywall } from '../../components/ExamplePaywall';
 

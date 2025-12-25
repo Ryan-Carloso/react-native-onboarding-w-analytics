@@ -1,5 +1,5 @@
 import { type ImageSourcePropType } from 'react-native';
-import type { OnboardingStep } from '../../../../src/spill-onboarding/types';
+import type { OnboardingStep } from 'rn-onboarding-analytics';
 
 const imageMap: Record<string, ImageSourcePropType> = {
   create: require('../../../assets/checklist/create.png'),

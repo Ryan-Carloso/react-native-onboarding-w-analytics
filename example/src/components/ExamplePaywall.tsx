@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { OnboardingPaywallPanel } from '../../../src';
+import { OnboardingPaywallPanel } from 'rn-onboarding-analytics';
 
 interface ExamplePaywallProps {
   onPressContinue: (planId: string) => void;

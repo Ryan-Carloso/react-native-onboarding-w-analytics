@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@blazejkustra/react-native-onboarding": ["./src/index"]
+      "rn-onboarding-analytics": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

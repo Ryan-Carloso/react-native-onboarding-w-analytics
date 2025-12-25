@@ -1,5 +1,5 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import Onboarding from '../../../src/spill-onboarding';
+import Onboarding from 'rn-onboarding-analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';

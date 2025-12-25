@@ -8,7 +8,7 @@
     ".": {
       "types": "./lib/typescript/src/index.d.ts",
       "require": "./lib/module/index.js"
-  },
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -171,6 +171,7 @@
   },
   "dependencies": {
     "expo-constants": "^18.0.12",
-    "expo-localization": "^17.0.8"
+    "expo-localization": "^17.0.8",
+    "rn-onboarding-analytics": "^1.4.0"
   }
 }
