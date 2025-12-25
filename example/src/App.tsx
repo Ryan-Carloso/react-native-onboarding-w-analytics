@@ -8,6 +8,7 @@ import OnboardingCustomSteps from './screens/OnboardingCustomSteps';
 import OnboardingCustomTheme from './screens/OnboardingCustomTheme';
 import OnboardingGradient from './screens/OnboardingGradient';
 import OnboardingChecklist from './screens/onboardChecklistWithPaywall/OnboardingChecklist';
+import JustPaywall from './screens/JustPaywall';
 
 enableScreens(true);
 
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   OnboardingCustomTheme: undefined;
   OnboardingGradient: undefined;
   OnboardingChecklist: undefined;
+  JustPaywall: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -60,6 +62,11 @@ export default function App() {
         <Stack.Screen
           name="OnboardingChecklist"
           component={OnboardingChecklist}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JustPaywall"
+          component={JustPaywall}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

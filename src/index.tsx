@@ -7,8 +7,11 @@ import {
   type OnboardingIntroPanelProps,
   type OnboardingStepPanelProps,
   type OnboardingStep,
+  type OnboardingPaywallPanelProps,
+  type PaywallPlan,
 } from './spill-onboarding/types';
 import SpillOnboarding from './spill-onboarding';
+import OnboardingPaywallPanel from './spill-onboarding/components/OnboardingPaywallPanel';
 import { Platform } from 'react-native';
 import React from 'react';
 
@@ -25,6 +28,7 @@ function Onboarding({ colors, fonts, theme, ...props }: OnboardingProps) {
 }
 
 export default Onboarding;
+export { OnboardingPaywallPanel };
 export type {
   OnboardingProps,
   OnboardingColors,
@@ -32,4 +36,6 @@ export type {
   OnboardingIntroPanelProps,
   OnboardingStepPanelProps,
   OnboardingStep,
+  OnboardingPaywallPanelProps,
+  PaywallPlan,
 };

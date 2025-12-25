@@ -64,6 +64,11 @@ export default function Home({ navigation }: Props) {
           title="Checklist Onboarding"
           onPress={() => navigation.navigate('OnboardingChecklist')}
         />
+        <View style={styles.spacer} />
+        <Button
+          title="Just Paywall"
+          onPress={() => navigation.navigate('JustPaywall')}
+        />
       </View>
 
       <View style={styles.footer}>
