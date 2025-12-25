@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { ExamplePaywall } from '../components/ExamplePaywall';
 

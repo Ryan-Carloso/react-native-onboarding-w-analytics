@@ -29,8 +29,8 @@ export const DarkTheme = {
   bg: {
     primary: '#0A84FF',
     secondary: '#000000',
-    label: '#1C1C1E',
-    accent: '#FFFFFF',
+    label: '#2C2C2E',
+    accent: '#0A84FF',
   },
   text: {
     primary: '#FFFFFF',

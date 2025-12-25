@@ -193,15 +193,16 @@ function OnboardingPaywallPanel({
 
             {renderPlans()}
 
-            {helperTextContinue && (
-              <Text style={styles.helperText}>{helperTextContinue}</Text>
-            )}
-
-            {renderButton()}
-
             {renderFooterLinks()}
           </View>
         </ScrollView>
+        <View style={styles.footerContainer}>
+          {helperTextContinue && (
+            <Text style={styles.helperText}>{helperTextContinue}</Text>
+          )}
+
+          {renderButton()}
+        </View>
       </View>
     </View>
   );
@@ -221,7 +222,7 @@ const createStyles = (theme: Theme) =>
     },
     sheetContainer: {
       flex: 1,
-      marginTop: -32,
+      marginTop: -6,
       backgroundColor: theme.bg.secondary,
       borderTopLeftRadius: 32,
       borderTopRightRadius: 32,
@@ -232,6 +233,12 @@ const createStyles = (theme: Theme) =>
     },
     contentContainer: {
       paddingBottom: 40,
+    },
+    footerContainer: {
+      paddingHorizontal: 16,
+      paddingBottom: 40,
+      paddingTop: 16,
+      backgroundColor: theme.bg.secondary,
     },
     contentWrapper: {
       paddingHorizontal: 16,
@@ -296,6 +303,7 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: 16,
+      minHeight: 76,
       borderRadius: 16,
       backgroundColor: theme.bg.secondary,
       borderWidth: 1,
@@ -309,7 +317,7 @@ const createStyles = (theme: Theme) =>
     },
     planCardSelected: {
       borderColor: theme.bg.accent,
-      backgroundColor: theme.bg.secondary,
+      backgroundColor: theme.bg.label,
       borderWidth: 2,
     },
     planTitle: {
@@ -341,14 +349,14 @@ const createStyles = (theme: Theme) =>
       textAlign: 'center',
       color: theme.text.secondary,
       fontSize: fontSizes.sm,
-      marginBottom: 12,
+      marginBottom: 8,
       fontWeight: '500',
     },
     footerLinksContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 24,
+      marginTop: 4,
       gap: 8,
     },
     footerLinkText: {

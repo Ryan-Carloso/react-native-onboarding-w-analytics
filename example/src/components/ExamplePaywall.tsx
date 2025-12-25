@@ -1,4 +1,3 @@
-import React from 'react';
 import { Alert } from 'react-native';
 import { OnboardingPaywallPanel } from '../../../src';
 
@@ -31,7 +30,12 @@ export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
           title: 'Weekly',
           price: '$2.99',
           interval: '/ week',
-          features: ['Unlimited lists', 'Priority support', 'No ads'],
+          features: [
+            'Unlimited lists',
+            'Priority support',
+            'No ads',
+            'Cloud backup',
+          ],
         },
         {
           id: 'monthly',
@@ -53,6 +57,7 @@ export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
             'All monthly features',
             'One-time payment',
             'Lifetime access',
+            'Cloud backup',
           ],
         },
       ]}
