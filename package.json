@@ -1,15 +1,14 @@
 {
   "name": "rn-onboarding-analytics",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "description": "Onboarding/tutorial flow for React Native with analytics.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
       "types": "./lib/typescript/src/index.d.ts",
-      "default": "./lib/module/index.js"
-    },
+      "require": "./lib/module/index.js"
+  },
     "./package.json": "./package.json"
   },
   "files": [
