@@ -7,7 +7,7 @@ import OnboardingCustomIntro from './screens/OnboardingCustomIntro';
 import OnboardingCustomSteps from './screens/OnboardingCustomSteps';
 import OnboardingCustomTheme from './screens/OnboardingCustomTheme';
 import OnboardingGradient from './screens/OnboardingGradient';
-import OnboardingChecklist from './screens/OnboardingChecklist';
+import OnboardingChecklist from './screens/onboardChecklistWithPaywall/OnboardingChecklist';
 
 enableScreens(true);
 
