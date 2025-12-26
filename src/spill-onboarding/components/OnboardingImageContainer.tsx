@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import type { ImageProps as ExpoImageProps } from 'expo-image';
 import {
   Image,
   type ImageSourcePropType,
@@ -134,7 +135,7 @@ function OnboardingImageContainer({
           <Animated.View style={[styles.image, imageAnimation]} ref={image.ref}>
             {ExpoImage ? (
               <ExpoImage
-                source={currentStepImage}
+                source={currentStepImage as ExpoImageProps['source']}
                 contentFit="contain"
                 transition={0}
                 style={styles.imageStyle}
