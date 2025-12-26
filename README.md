@@ -28,7 +28,16 @@ npm install rn-onboarding-analytics
 The library requires these dependencies for animations and safe area context:
 
 ```sh
-npm install react-native-reanimated react-native-safe-area-context expo-constants expo-localization
+npm install react-native-reanimated react-native-safe-area-context expo-constants expo-localization react-native-iap
+```
+
+```
+Add on the babel config:
+```
+plugins: [
+  // should be always the last plugin
+  'react-native-reanimated/plugin',
+],
 ```
 
 Optionally for image support, install one of:
