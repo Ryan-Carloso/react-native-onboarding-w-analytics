@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   Image,
   StyleSheet,
@@ -7,7 +7,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Platform,
 } from 'react-native';
+import {
+  initConnection,
+  getSubscriptions,
+  requestSubscription,
+  endConnection,
+  type Subscription,
+} from 'react-native-iap';
 import { useTheme } from '../../utils/ThemeContext';
 import type { Theme } from '../../utils/theme';
 import PrimaryButton from '../buttons/PrimaryButton';
@@ -27,14 +35,78 @@ function OnboardingPaywallPanel({
   onRestorePurchase,
   onTerms,
   onPrivacy,
+  subscriptionSkus,
 }: OnboardingPaywallPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>(
     plans[0]?.id || ''
   );
+  const [iapProducts, setIapProducts] = useState<Subscription[]>([]);
 
-  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+  useEffect(() => {
+    let isMounted = true;
+
+    if (subscriptionSkus) {
+      const skus = Platform.select({
+        ios: subscriptionSkus.ios,
+        android: subscriptionSkus.android,
+      });
+
+      if (skus && skus.length > 0) {
+        const fetchProducts = async () => {
+          try {
+            await initConnection();
+            if (!isMounted) return;
+
+            const products = await getSubscriptions({ skus });
+            if (isMounted) {
+              setIapProducts(products);
+            }
+          } catch (err) {
+            console.warn('IAP Error:', err);
+          }
+        };
+
+        fetchProducts();
+      }
+    }
+
+    return () => {
+      isMounted = false;
+      if (subscriptionSkus) {
+        endConnection();
+      }
+    };
+  }, [subscriptionSkus]);
+
+  const displayPlans = useMemo(() => {
+    if (iapProducts.length === 0) return plans;
+
+    return plans.map((plan) => {
+      const iapProduct = iapProducts.find((p) => p.productId === plan.id);
+      if (iapProduct) {
+        let price = plan.price;
+        if (Platform.OS === 'ios') {
+          price = (iapProduct as any).localizedPrice || plan.price;
+        } else if (Platform.OS === 'android') {
+          // Android specific logic for RNIap v12+
+          const offer = (iapProduct as any).subscriptionOfferDetails?.[0];
+          price =
+            offer?.pricingPhases?.pricingPhaseList?.[0]?.formattedPrice ||
+            (iapProduct as any).localizedPrice ||
+            plan.price;
+        }
+        return {
+          ...plan,
+          price,
+        };
+      }
+      return plan;
+    });
+  }, [plans, iapProducts]);
+
+  const selectedPlan = displayPlans.find((p) => p.id === selectedPlanId);
 
   const renderTitle = () => {
     if (!title) return null;
@@ -79,7 +151,7 @@ function OnboardingPaywallPanel({
   const renderPlans = () => {
     return (
       <View style={styles.plansContainer}>
-        {plans.map((plan) => {
+        {displayPlans.map((plan) => {
           const isSelected = plan.id === selectedPlanId;
           return (
             <TouchableOpacity
@@ -124,7 +196,42 @@ function OnboardingPaywallPanel({
   };
 
   const renderButton = () => {
-    const handlePress = () => onPressContinue(selectedPlanId);
+    const handlePress = async () => {
+      if (subscriptionSkus && selectedPlanId) {
+        try {
+          const iapProduct = iapProducts.find(
+            (p) => p.productId === selectedPlanId
+          );
+          if (iapProduct) {
+            // Request subscription
+            // For Android, we might need offerToken if available
+            let offerToken;
+            if (Platform.OS === 'android') {
+              offerToken = (iapProduct as any).subscriptionOfferDetails?.[0]
+                ?.offerToken;
+            }
+
+            await requestSubscription({
+              sku: selectedPlanId,
+              ...(offerToken && {
+                subscriptionOffers: [{ sku: selectedPlanId, offerToken }],
+              }),
+            });
+            // If successful (no error thrown), we assume success or pending
+            onPressContinue(selectedPlanId);
+            return;
+          }
+        } catch (err) {
+          console.log('Purchase failed', err);
+          // Optionally alert user?
+          // Alert.alert('Purchase Failed', (err as any).message);
+          // We allow fallback to onPressContinue? No, usually we stop.
+          return;
+        }
+      }
+
+      onPressContinue(selectedPlanId);
+    };
 
     if (typeof button === 'string') {
       return <PrimaryButton text={button} onPress={handlePress} />;

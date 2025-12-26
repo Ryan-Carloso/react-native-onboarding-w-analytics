@@ -300,10 +300,20 @@ export interface OnboardingPaywallPanelProps {
 
   /** Link for privacy policy action. */
   onPrivacy?: { text?: string; onPress: () => void };
+
+  /**
+   * SKUs for In-App Purchases (Subscriptions).
+   * If provided, the component will attempt to fetch product details from the store
+   * using react-native-iap and handle purchases.
+   */
+  subscriptionSkus?: {
+    ios?: string[];
+    android?: string[];
+  };
 }
 
 type OnboardingPaywallPanelConfig =
-  | Omit<OnboardingPaywallPanelProps, 'onPressContinue'>
+  | OnboardingPaywallPanelProps
   | (({
       onPressContinue,
     }: {

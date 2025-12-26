@@ -191,10 +191,15 @@ function SpillOnboarding({
       return paywallPanelProps({ onPressContinue: onPaywallContinue });
     }
 
+    const { onPressContinue, ...otherProps } = paywallPanelProps;
+
+    // Use the provided onPressContinue if available, otherwise use default
+    const handleContinue = onPressContinue || onPaywallContinue;
+
     return (
       <OnboardingPaywallPanel
-        onPressContinue={onPaywallContinue}
-        {...paywallPanelProps}
+        onPressContinue={handleContinue}
+        {...otherProps}
       />
     );
   };

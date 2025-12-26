@@ -5,6 +5,14 @@ interface ExamplePaywallProps {
   onPressContinue: (planId: string) => void;
 }
 
+const iosMonthly = 'com.example.monthly';
+const iosYearly = 'com.example.yearly';
+
+const subscriptionSkus = {
+  ios: [iosMonthly, iosYearly, 'weekly_footbal'],
+  android: ['androidTestSku'],
+};
+
 export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
   return (
     <OnboardingPaywallPanel
@@ -12,6 +20,7 @@ export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
       subtitle="Get unlimited lists and more"
       image={require('../../assets/checklist/create.png')}
       helperTextContinue="7 days free"
+      subscriptionSkus={subscriptionSkus}
       onRestorePurchase={{
         text: 'Restore',
         onPress: () => Alert.alert('Restore Purchase clicked'),
@@ -26,19 +35,7 @@ export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
       }}
       plans={[
         {
-          id: 'weekly',
-          title: 'Weekly',
-          price: '$2.99',
-          interval: '/ week',
-          features: [
-            'Unlimited lists',
-            'Priority support',
-            'No ads',
-            'Cloud backup',
-          ],
-        },
-        {
-          id: 'monthly',
+          id: iosMonthly,
           title: 'Monthly',
           price: '$9.99',
           interval: '/ month',
@@ -50,9 +47,10 @@ export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
           ],
         },
         {
-          id: 'lifetime',
-          title: 'Lifetime',
+          id: iosYearly,
+          title: 'Yearly',
           price: '$49.99',
+          interval: '/ year',
           features: [
             'All monthly features',
             'One-time payment',
