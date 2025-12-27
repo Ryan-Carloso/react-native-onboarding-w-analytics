@@ -18,7 +18,7 @@ export function ExamplePaywall({ onPressContinue }: ExamplePaywallProps) {
     <OnboardingPaywallPanel
       title="Unlock Premium Features"
       subtitle="Get unlimited lists and more"
-      image={require('../../assets/checklist/create.png')}
+      image={require('@/assets/images/create.png')}
       helperTextContinue="7 days free"
       subscriptionSkus={subscriptionSkus}
       onRestorePurchase={{

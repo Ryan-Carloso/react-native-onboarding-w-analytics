@@ -13,7 +13,6 @@ import type { OnboardingStep } from '../types';
 
 interface OnboardingStepContainerProps {
   currentStep: OnboardingStep | undefined;
-  showCloseButton?: boolean;
   animationDuration: number;
   onSkip?: () => void;
   renderStepContent: () => React.ReactNode;
@@ -22,14 +21,7 @@ interface OnboardingStepContainerProps {
 
 const OnboardingStepContainer = forwardRef<any, OnboardingStepContainerProps>(
   (
-    {
-      currentStep,
-      showCloseButton,
-      animationDuration,
-      onSkip,
-      renderStepContent,
-      skipButton,
-    },
+    { currentStep, animationDuration, onSkip, renderStepContent, skipButton },
     ref
   ) => {
     const { theme } = useTheme();
@@ -41,7 +33,7 @@ const OnboardingStepContainer = forwardRef<any, OnboardingStepContainerProps>(
 
     return (
       <>
-        {showCloseButton && onSkip && (
+        {onSkip && (
           <Reanimated.View
             entering={FadeIn.duration(animationDuration)}
             exiting={FadeOut.duration(animationDuration)}

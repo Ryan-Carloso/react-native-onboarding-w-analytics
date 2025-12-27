@@ -2,9 +2,9 @@ import { type ImageSourcePropType } from 'react-native';
 import type { OnboardingStep } from 'rn-onboarding-analytics';
 
 const imageMap: Record<string, ImageSourcePropType> = {
-  create: require('@/assets/images/paywall/create.png'),
-  share: require('@/assets/images/paywall/share.png'),
-  categorize: require('@/assets/images/paywall/categorize.png'),
+  create: require('@/assets/images/create.png'),
+  share: require('@/assets/images/share.png'),
+  categorize: require('@/assets/images/categorize.png'),
 };
 
 const pages = [

@@ -23,6 +23,7 @@ import {
 import { useTheme } from '../../utils/ThemeContext';
 import type { Theme } from '../../utils/theme';
 import PrimaryButton from '../buttons/PrimaryButton';
+import SkipButton from '../buttons/SkipButton';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
 import type { OnboardingPaywallPanelProps, PlatformSku } from '../types';
 import Skeleton from './Skeleton';
@@ -31,6 +32,7 @@ const { height: screenHeight } = Dimensions.get('window');
 
 function OnboardingPaywallPanel({
   onPressContinue,
+  onClose,
   title,
   subtitle,
   button,
@@ -568,8 +570,22 @@ function OnboardingPaywallPanel({
     );
   };
 
+  const handleClose = () => {
+    console.log('[OnboardingPaywallPanel] Close button pressed');
+    if (onClose) {
+      onClose();
+    } else {
+      console.warn('[OnboardingPaywallPanel] onClose is undefined');
+    }
+  };
+
   return (
     <View style={styles.mainContainer}>
+      {onClose && (
+        <View style={styles.closeButton} pointerEvents="box-none">
+          <SkipButton onPress={handleClose} />
+        </View>
+      )}
       <View style={styles.headerImageContainer}>
         {typeof image === 'function'
           ? image()
@@ -617,6 +633,12 @@ const createStyles = (theme: Theme) =>
     mainContainer: {
       flex: 1,
       backgroundColor: theme.bg.secondary,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: (theme.insets?.top || 0) + 16,
+      right: 16,
+      zIndex: 20,
     },
     headerImageContainer: {
       height: screenHeight * 0.3,

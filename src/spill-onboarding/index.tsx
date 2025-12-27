@@ -26,7 +26,6 @@ function SpillOnboarding({
   onComplete,
   onSkip,
   onStepChange: onStepChangeProps,
-  showCloseButton = true,
   showBackButton = true,
   wrapInModalOnWeb = true,
   background,
@@ -192,14 +191,17 @@ function SpillOnboarding({
       return paywallPanelProps({ onPressContinue: onPaywallContinue });
     }
 
-    const { onPressContinue, ...otherProps } = paywallPanelProps;
+    const { onPressContinue, onClose, ...otherProps } = paywallPanelProps;
 
     // Use the provided onPressContinue if available, otherwise use default
     const handleContinue = onPressContinue || onPaywallContinue;
+    // Use provided onClose or fallback to onSkip
+    const handleClose = onClose || (() => onSkip?.());
 
     return (
       <OnboardingPaywallPanel
         onPressContinue={handleContinue}
+        onClose={handleClose}
         {...otherProps}
       />
     );
@@ -276,7 +278,6 @@ function SpillOnboarding({
         <OnboardingStepContainer
           currentStep={currentStep}
           animationDuration={animationDuration}
-          showCloseButton={showCloseButton}
           renderStepContent={renderStepContent}
           onSkip={onSkip}
           ref={stepPanel.ref}

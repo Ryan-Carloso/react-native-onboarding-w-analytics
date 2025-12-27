@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { OnboardingPaywallPanel } from 'rn-onboarding-analytics';
+import { OnboardingPaywallPanel } from '../../../../src';
 import { products } from './onboard.consts';
 
 export default function PaywallScreen() {
@@ -8,8 +8,9 @@ export default function PaywallScreen() {
     <OnboardingPaywallPanel
       title="Unlock Premium Features"
       subtitle="Get unlimited lists and more"
-      image={require('@/assets/images/paywall/create.png')}
+      image={require('@/assets/images/create.png')}
       helperTextContinue="7 days free"
+      onClose={() => console.log('PaywallScreen: Close clicked')}
       onRestorePurchase={{
         text: 'Restore',
         onPress: () => {

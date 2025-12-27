@@ -228,9 +228,6 @@ export interface OnboardingProps {
   /** Notifies consumers when the active step index changes. */
   onStepChange?: (stepIndex: number) => void;
 
-  /** Whether to show the close button in the header. */
-  showCloseButton?: boolean;
-
   /** Whether to show a back button on steps */
   showBackButton?: boolean;
 
@@ -375,6 +372,12 @@ export interface OnboardingPaywallPanelProps {
       | void
       | null;
   }) => void;
+
+  /**
+   * Callback invoked when the user taps the close button.
+   * If provided, a close button will be rendered in the header.
+   */
+  onClose?: () => void;
 }
 
 type OnboardingPaywallPanelConfig =

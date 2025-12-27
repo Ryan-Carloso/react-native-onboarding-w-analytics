@@ -13,7 +13,12 @@ function SkipButton({ onPress }: Props) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <TouchableOpacity style={styles.wrapper} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.wrapper}
+      onPress={onPress}
+      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+      activeOpacity={0.7}
+    >
       <CloseIcon color={theme.text.primary} size={24} />
     </TouchableOpacity>
   );

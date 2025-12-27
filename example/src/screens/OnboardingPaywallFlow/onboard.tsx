@@ -1,4 +1,4 @@
-import Onboarding from 'rn-onboarding-analytics';
+import Onboarding from '../../../../src/spill-onboarding';
 import { steps } from './onboard.consts';
 import PaywallScreen from './paywall';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,7 +22,7 @@ export default function OnboardingChecklist() {
       animationDuration={500}
       theme="dark"
       introPanel={{
-        image: require('@/assets/images/paywall/share.png'),
+        image: require('@/assets/images/share.png'),
         title: 'The Right Way to do',
         subtitle: 'Shopping lists',
         button: 'Get Started',
