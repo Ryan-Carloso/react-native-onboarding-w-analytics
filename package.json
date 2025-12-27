@@ -1,6 +1,6 @@
 {
   "name": "rn-onboarding-analytics",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Onboarding/tutorial flow for React Native with analytics.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -176,6 +176,6 @@
   "dependencies": {
     "expo-constants": "^18.0.12",
     "expo-localization": "^17.0.8",
-    "rn-onboarding-analytics": "^1.4.0"
+    "rn-onboarding-analytics": "^1.7.1"
   }
 }

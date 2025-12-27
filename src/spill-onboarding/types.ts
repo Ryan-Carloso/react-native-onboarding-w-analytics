@@ -1,5 +1,10 @@
 import { type ReactNode } from 'react';
 import type { ImageSourcePropType } from 'react-native';
+import type {
+  PurchaseError,
+  ProductPurchase,
+  SubscriptionPurchase,
+} from 'react-native-iap';
 
 /**
  * Theme color tokens used by onboarding components.
@@ -338,6 +343,22 @@ export interface OnboardingPaywallPanelProps {
    * using react-native-iap and handle purchases.
    */
   subscriptionSkus?: PlatformSku;
+
+  /**
+   * Callback invoked when a purchase attempt finishes (success or failure).
+   * @param result Object containing status, planId, and optionally error or data.
+   */
+  onPurchaseResult?: (result: {
+    status: 'success' | 'error';
+    planId: string;
+    error?: PurchaseError;
+    data?:
+      | ProductPurchase
+      | ProductPurchase[]
+      | SubscriptionPurchase
+      | void
+      | null;
+  }) => void;
 }
 
 type OnboardingPaywallPanelConfig =

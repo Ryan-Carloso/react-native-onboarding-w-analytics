@@ -12382,7 +12382,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"rn-onboarding-analytics@^1.4.0, rn-onboarding-analytics@workspace:.":
+"rn-onboarding-analytics@^1.7.1, rn-onboarding-analytics@workspace:.":
   version: 0.0.0-use.local
   resolution: "rn-onboarding-analytics@workspace:."
   dependencies:
@@ -12416,7 +12416,7 @@ __metadata:
     react-native-svg: ^15.13.0
     react-native-worklets: ^0.5.1
     release-it: ^19.0.4
-    rn-onboarding-analytics: ^1.4.0
+    rn-onboarding-analytics: ^1.7.1
     typescript: 5.6.3
   peerDependencies:
     expo-image: "*"

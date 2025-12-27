@@ -18,6 +18,7 @@ import {
   endConnection,
   type Subscription,
   type Product,
+  type PurchaseError,
 } from 'react-native-iap';
 import { useTheme } from '../../utils/ThemeContext';
 import type { Theme } from '../../utils/theme';
@@ -40,6 +41,7 @@ function OnboardingPaywallPanel({
   onTerms,
   onPrivacy,
   subscriptionSkus,
+  onPurchaseResult,
 }: OnboardingPaywallPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -315,6 +317,7 @@ function OnboardingPaywallPanel({
       console.log('OnboardingPaywallPanel: handlePress', { selectedPlanId });
       if ((subscriptionSkus || products) && selectedPlanId) {
         try {
+          let result;
           const iapProduct = iapProducts.find(
             (p) => p.productId === selectedPlanId
           );
@@ -342,7 +345,7 @@ function OnboardingPaywallPanel({
                 sku: selectedPlanId,
                 offerToken,
               });
-              await requestSubscription({
+              result = await requestSubscription({
                 sku: selectedPlanId,
                 ...(offerToken && {
                   subscriptionOffers: [{ sku: selectedPlanId, offerToken }],
@@ -353,7 +356,7 @@ function OnboardingPaywallPanel({
                 'OnboardingPaywallPanel: Requesting one-time purchase',
                 { sku: selectedPlanId }
               );
-              await requestPurchase({
+              result = await requestPurchase({
                 sku: selectedPlanId,
               });
             }
@@ -369,7 +372,7 @@ function OnboardingPaywallPanel({
                 'OnboardingPaywallPanel: Fallback - attempting requestSubscription',
                 selectedPlanId
               );
-              await requestSubscription({ sku: selectedPlanId });
+              result = await requestSubscription({ sku: selectedPlanId });
             } catch (subErr) {
               console.warn(
                 'OnboardingPaywallPanel: Fallback requestSubscription failed',
@@ -380,7 +383,7 @@ function OnboardingPaywallPanel({
                 selectedPlanId
               );
               try {
-                await requestPurchase({ sku: selectedPlanId });
+                result = await requestPurchase({ sku: selectedPlanId });
               } catch (purchErr) {
                 console.warn(
                   'OnboardingPaywallPanel: Fallback requestPurchase failed',
@@ -390,6 +393,14 @@ function OnboardingPaywallPanel({
               }
             }
           }
+
+          if (onPurchaseResult) {
+            onPurchaseResult({
+              status: 'success',
+              planId: selectedPlanId,
+              data: result,
+            });
+          }
         } catch (err) {
           console.warn('Purchase Error:', err);
           if (typeof err === 'object') {
@@ -397,6 +408,13 @@ function OnboardingPaywallPanel({
               'Purchase Error Details:',
               JSON.stringify(err, null, 2)
             );
+          }
+          if (onPurchaseResult) {
+            onPurchaseResult({
+              status: 'error',
+              planId: selectedPlanId,
+              error: err as PurchaseError,
+            });
           }
           return;
         }
