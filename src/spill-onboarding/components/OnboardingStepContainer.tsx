@@ -1,4 +1,4 @@
-import React, { useMemo, type ReactNode } from 'react';
+import React, { useMemo, type ReactNode, forwardRef } from 'react';
 import { StyleSheet } from 'react-native';
 import Reanimated, {
   FadeIn,
@@ -16,54 +16,57 @@ interface OnboardingStepContainerProps {
   showCloseButton?: boolean;
   animationDuration: number;
   onSkip?: () => void;
-  ref: React.RefObject<any>;
   renderStepContent: () => React.ReactNode;
   skipButton?: ({ onPress }: { onPress: () => void }) => ReactNode;
 }
 
-function OnboardingStepContainer({
-  currentStep,
-  showCloseButton,
-  animationDuration,
-  onSkip,
-  ref,
-  renderStepContent,
-  skipButton,
-}: OnboardingStepContainerProps) {
-  const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+const OnboardingStepContainer = forwardRef<any, OnboardingStepContainerProps>(
+  (
+    {
+      currentStep,
+      showCloseButton,
+      animationDuration,
+      onSkip,
+      renderStepContent,
+      skipButton,
+    },
+    ref
+  ) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
-  if (!currentStep) {
-    return null;
-  }
+    if (!currentStep) {
+      return null;
+    }
 
-  return (
-    <>
-      {showCloseButton && onSkip && (
+    return (
+      <>
+        {showCloseButton && onSkip && (
+          <Reanimated.View
+            entering={FadeIn.duration(animationDuration)}
+            exiting={FadeOut.duration(animationDuration)}
+            style={styles.close}
+          >
+            {skipButton ? (
+              skipButton({ onPress: onSkip })
+            ) : (
+              <SkipButton onPress={onSkip} />
+            )}
+          </Reanimated.View>
+        )}
+
         <Reanimated.View
-          entering={FadeIn.duration(animationDuration)}
-          exiting={FadeOut.duration(animationDuration)}
-          style={styles.close}
+          ref={ref}
+          entering={FadeInDown.duration(animationDuration)}
+          exiting={FadeOutDown.duration(animationDuration)}
+          style={styles.bottomPanel}
         >
-          {skipButton ? (
-            skipButton({ onPress: onSkip })
-          ) : (
-            <SkipButton onPress={onSkip} />
-          )}
+          {renderStepContent()}
         </Reanimated.View>
-      )}
-
-      <Reanimated.View
-        ref={ref}
-        entering={FadeInDown.duration(animationDuration)}
-        exiting={FadeOutDown.duration(animationDuration)}
-        style={styles.bottomPanel}
-      >
-        {renderStepContent()}
-      </Reanimated.View>
-    </>
-  );
-}
+      </>
+    );
+  }
+);
 
 export default OnboardingStepContainer;
 
