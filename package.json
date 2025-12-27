@@ -38,7 +38,8 @@
     "prepare": "bob build",
     "prepack": "sed -i '' '1s|.*|![Banner](assets/banner.png)|' README.md",
     "postpack": "git checkout README.md",
-    "release": "release-it --only-version"
+    "release": "release-it --only-version",
+    "watch:yalc": "nodemon --watch src --ext ts,tsx,js,json --exec 'npm run prepare && yalc push'"
   },
   "keywords": [
     "react-native",
@@ -77,7 +78,8 @@
     "eslint-plugin-prettier": "^5.5.4",
     "expo-image": "^3.0.8",
     "jest": "^29.7.0",
-    "prettier": "^3.6.2",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.7.4",
     "react": "19.1.0",
     "react-native": "0.81.4",
     "react-native-builder-bob": "^0.40.13",

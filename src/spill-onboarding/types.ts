@@ -257,12 +257,34 @@ export interface OnboardingProps {
   paywallPanel?: OnboardingPaywallPanelConfig;
 }
 
+export interface PlatformSku {
+  ios?: string[];
+  android?: string[];
+}
+
 export interface PaywallPlan {
   id: string;
   title: string;
   price: string;
   interval?: string;
   features?: string[];
+}
+
+/**
+ * Simplified configuration for a single paywall product/plan.
+ */
+export interface PaywallProductConfig {
+  /** SKUs for different platforms. */
+  SKus: PlatformSku | string[];
+
+  /** Main product title/name. */
+  title: string;
+
+  /** Array of product features. */
+  featues: string[];
+
+  /** Numeric or alphanumeric sorting preference. */
+  sortOrder: number | string;
 }
 
 /**
@@ -278,8 +300,17 @@ export interface OnboardingPaywallPanelProps {
   /** Subtitle content. */
   subtitle?: string | ReactNode;
 
-  /** List of plans to display. */
-  plans: PaywallPlan[];
+  /**
+   * List of plans to display.
+   * Required if `products` is not provided.
+   */
+  plans?: PaywallPlan[];
+
+  /**
+   * Simplified configuration for paywall products.
+   * If provided, handles fetching and displaying products automatically.
+   */
+  products?: PaywallProductConfig[];
 
   /**
    * Button content. Either a simple string label or a render function.
@@ -306,10 +337,7 @@ export interface OnboardingPaywallPanelProps {
    * If provided, the component will attempt to fetch product details from the store
    * using react-native-iap and handle purchases.
    */
-  subscriptionSkus?: {
-    ios?: string[];
-    android?: string[];
-  };
+  subscriptionSkus?: PlatformSku;
 }
 
 type OnboardingPaywallPanelConfig =

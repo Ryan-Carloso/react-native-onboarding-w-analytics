@@ -34,17 +34,19 @@ npm install react-native-reanimated react-native-safe-area-context expo-constant
 ```
 Add on the babel config:
 ```
+
 plugins: [
-  // should be always the last plugin
-  'react-native-reanimated/plugin',
+// should be always the last plugin
+'react-native-reanimated/plugin',
 ],
-```
+
+````
 
 Optionally for image support, install one of:
 
 ```sh
 npm install expo-image
-```
+````
 
 ```sh
 npm install react-native-svg
@@ -355,6 +357,112 @@ skipButton={({ onPress }) => (
     <Text style={styles.customClose}>✕</Text>
   </TouchableOpacity>
 )}
+```
+
+#### `paywallPanel`
+
+**Type:** `OnboardingPaywallPanelConfig`  
+**Optional** - Configuration for the paywall screen shown after the last step.
+
+The paywall panel can be either:
+
+- **Configuration object**: Pass an object with properties to use the default paywall
+- **Custom component**: Pass a component that receives `onPressContinue` callback
+
+**Option 1: Configuration Object**
+
+You can use the streamlined configuration by passing `products` with the required parameters. The `SKus` can be defined either as a platform-specific object or a simple array of strings.
+
+```tsx
+paywallPanel={{
+  title: "Unlock Premium",
+  subtitle: "Get access to all features",
+  button: "Subscribe",
+  image: require('./assets/paywall.png'),
+  onPressContinue: (planId) => console.log('Purchased:', planId),
+  // Optional links
+  onRestorePurchase: {
+    text: "Restore",
+    onPress: () => console.log("Restore clicked"),
+  },
+  onTerms: {
+    text: "Terms",
+    onPress: () => console.log("Terms clicked"),
+  },
+  onPrivacy: {
+    text: "Privacy",
+    onPress: () => console.log("Privacy clicked"),
+  },
+  products: [
+    {
+      // Platform specific SKUs (Recommended)
+      SKus: {
+        ios: ['pro_monthly_ios'],
+        android: ['pro_monthly_android']
+      },
+      title: "Monthly Pro",
+      featues: ["Unlimited Access", "No Ads"],
+      sortOrder: 1
+    },
+    {
+      // Simple array (The library will attempt to match these SKus)
+      SKus: ['pro_yearly'],
+      title: "Yearly Pro",
+      featues: ["Unlimited Access", "No Ads", "Save 20%"],
+      sortOrder: 2
+    }
+  ]
+}}
+```
+
+**Option 2: Custom Component**
+
+For complete control, you can pass a custom component. This is useful if you want to wrap the paywall in your own layout or use `OnboardingPaywallPanel` directly with custom logic.
+
+```tsx
+import { OnboardingPaywallPanel } from 'rn-onboarding-analytics';
+
+function PaywallScreen({ onPressContinue }) {
+  return (
+    <OnboardingPaywallPanel
+      title="Unlock Premium Features"
+      subtitle="Get unlimited lists and more"
+      image={require('./assets/paywall.png')}
+      onPressContinue={onPressContinue}
+      products={[
+        {
+          SKus: { ios: ['weeklyDose'] },
+          title: 'Weekly',
+          featues: ['Unlimited lists', 'Priority support'],
+          sortOrder: 1,
+        },
+      ]}
+      onRestorePurchase={{
+        text: 'Restore',
+        onPress: () => console.log('Restore'),
+      }}
+    />
+  );
+}
+
+// In your Onboarding usage:
+<Onboarding
+  // ...
+  paywallPanel={PaywallScreen}
+/>;
+```
+
+**Legacy Configuration:**  
+You can also manually provide `plans` and `subscriptionSkus`:
+
+```tsx
+paywallPanel={{
+  // ...
+  plans: [
+    { id: 'monthly', title: 'Monthly', price: '$9.99', features: [...] }
+  ],
+  subscriptionSkus: { ios: [...], android: [...] }
+}}
 ```
 
 ## 💡 Best Practices

@@ -12,15 +12,18 @@ import {
 import {
   initConnection,
   getSubscriptions,
+  getProducts,
   requestSubscription,
+  requestPurchase,
   endConnection,
   type Subscription,
+  type Product,
 } from 'react-native-iap';
 import { useTheme } from '../../utils/ThemeContext';
 import type { Theme } from '../../utils/theme';
 import PrimaryButton from '../buttons/PrimaryButton';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
-import type { OnboardingPaywallPanelProps } from '../types';
+import type { OnboardingPaywallPanelProps, PlatformSku } from '../types';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -30,7 +33,8 @@ function OnboardingPaywallPanel({
   subtitle,
   button,
   image,
-  plans,
+  plans = [],
+  products,
   helperTextContinue,
   onRestorePurchase,
   onTerms,
@@ -39,48 +43,159 @@ function OnboardingPaywallPanel({
 }: OnboardingPaywallPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [selectedPlanId, setSelectedPlanId] = useState<string>(
-    plans[0]?.id || ''
+
+  // Initialize selectedPlanId based on available configuration
+  const initialPlanId = useMemo(() => {
+    if (products && products.length > 0) {
+      // Sort first to pick the first one correctly if needed,
+      // but simplistic approach: pick the first product's first SKU for the current platform
+      const firstProduct = products[0];
+      if (!firstProduct) return '';
+      let firstSku = '';
+      if (Array.isArray(firstProduct.SKus)) {
+        firstSku = firstProduct.SKus[0] || '';
+      } else {
+        const skusObj = firstProduct.SKus as PlatformSku;
+        const skus = Platform.select({
+          ios: skusObj.ios,
+          android: skusObj.android,
+        });
+        firstSku = skus?.[0] || '';
+      }
+      return firstSku;
+    }
+    return plans?.[0]?.id || '';
+  }, [products, plans]);
+
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(initialPlanId);
+  const [iapProducts, setIapProducts] = useState<(Subscription | Product)[]>(
+    []
   );
-  const [iapProducts, setIapProducts] = useState<Subscription[]>([]);
 
   useEffect(() => {
     let isMounted = true;
 
-    if (subscriptionSkus) {
+    const fetchIapProducts = async (skus: string[]) => {
+      try {
+        await initConnection();
+        if (!isMounted) return;
+
+        // Fetch both subscriptions and products to cover all bases
+        const [subs, prods] = await Promise.all([
+          getSubscriptions({ skus }).catch(() => [] as Subscription[]),
+          getProducts({ skus }).catch(() => [] as Product[]),
+        ]);
+
+        if (isMounted) {
+          // Filter out duplicates if any (unlikely but safe)
+          const allItems = [...subs, ...prods];
+          const uniqueItems = Array.from(
+            new Map(allItems.map((item) => [item.productId, item])).values()
+          );
+          setIapProducts(uniqueItems);
+        }
+      } catch (err) {
+        console.warn('IAP Error:', err);
+      }
+    };
+
+    if (products && products.length > 0) {
+      // Collect all SKUs from all products for current platform
+      const allSkus = products.flatMap((p) => {
+        if (Array.isArray(p.SKus)) {
+          return p.SKus;
+        }
+        const skusObj = p.SKus as PlatformSku;
+        const skus = Platform.select({
+          ios: skusObj.ios,
+          android: skusObj.android,
+        });
+        return skus || [];
+      });
+
+      if (allSkus.length > 0) {
+        fetchIapProducts(allSkus);
+      }
+    } else if (subscriptionSkus) {
       const skus = Platform.select({
         ios: subscriptionSkus.ios,
         android: subscriptionSkus.android,
       });
 
       if (skus && skus.length > 0) {
-        const fetchProducts = async () => {
-          try {
-            await initConnection();
-            if (!isMounted) return;
-
-            const products = await getSubscriptions({ skus });
-            if (isMounted) {
-              setIapProducts(products);
-            }
-          } catch (err) {
-            console.warn('IAP Error:', err);
-          }
-        };
-
-        fetchProducts();
+        fetchIapProducts(skus);
       }
     }
 
     return () => {
       isMounted = false;
-      if (subscriptionSkus) {
+      if (subscriptionSkus || products) {
         endConnection();
       }
     };
-  }, [subscriptionSkus]);
+  }, [subscriptionSkus, products]);
 
   const displayPlans = useMemo(() => {
+    // New Configuration Mode
+    if (products && products.length > 0) {
+      const mappedPlans = products.map((config) => {
+        // Find if any of the product's SKUs matches a fetched IAP product
+        let targetSkus: string[] = [];
+        if (Array.isArray(config.SKus)) {
+          targetSkus = config.SKus;
+        } else {
+          const skusObj = config.SKus as PlatformSku;
+          targetSkus =
+            Platform.select({
+              ios: skusObj.ios,
+              android: skusObj.android,
+            }) || [];
+        }
+
+        const iapProduct = iapProducts.find((p) =>
+          targetSkus.includes(p.productId)
+        );
+
+        let price = '...'; // Default loading state
+        let id = targetSkus[0] || ''; // Default ID to first SKU
+
+        if (iapProduct) {
+          id = iapProduct.productId;
+          if (Platform.OS === 'ios') {
+            price = (iapProduct as any).localizedPrice || price;
+          } else if (Platform.OS === 'android') {
+            const offer = (iapProduct as any).subscriptionOfferDetails?.[0];
+            price =
+              offer?.pricingPhases?.pricingPhaseList?.[0]?.formattedPrice ||
+              (iapProduct as any).localizedPrice ||
+              price;
+          }
+        }
+
+        return {
+          id,
+          title: config.title,
+          price,
+          // features with typo 'featues' mapped to correct prop 'features'
+          features: config.featues,
+          interval: '', // Could be inferred from IAP if needed
+          sortOrder: config.sortOrder,
+        };
+      });
+
+      // Sort based on sortOrder
+      return mappedPlans.sort((a, b) => {
+        if (
+          typeof a.sortOrder === 'number' &&
+          typeof b.sortOrder === 'number'
+        ) {
+          return a.sortOrder - b.sortOrder;
+        }
+        return String(a.sortOrder).localeCompare(String(b.sortOrder));
+      });
+    }
+
+    // Legacy Mode
     if (iapProducts.length === 0) return plans;
 
     return plans.map((plan) => {
@@ -104,7 +219,7 @@ function OnboardingPaywallPanel({
       }
       return plan;
     });
-  }, [plans, iapProducts]);
+  }, [products, plans, iapProducts]);
 
   const selectedPlan = displayPlans.find((p) => p.id === selectedPlanId);
 
@@ -197,39 +312,95 @@ function OnboardingPaywallPanel({
 
   const renderButton = () => {
     const handlePress = async () => {
-      if (subscriptionSkus && selectedPlanId) {
+      console.log('OnboardingPaywallPanel: handlePress', { selectedPlanId });
+      if ((subscriptionSkus || products) && selectedPlanId) {
         try {
           const iapProduct = iapProducts.find(
             (p) => p.productId === selectedPlanId
           );
           if (iapProduct) {
-            // Request subscription
-            // For Android, we might need offerToken if available
-            let offerToken;
-            if (Platform.OS === 'android') {
-              offerToken = (iapProduct as any).subscriptionOfferDetails?.[0]
-                ?.offerToken;
-            }
+            // Determine if it's a subscription or one-time purchase
+            // Subscriptions usually have 'subscriptionPeriodNumberIOS' or 'subscriptionOfferDetails'
+            const isSubscription =
+              'subscriptionPeriodNumberIOS' in iapProduct ||
+              'subscriptionOfferDetails' in iapProduct;
 
-            await requestSubscription({
-              sku: selectedPlanId,
-              ...(offerToken && {
-                subscriptionOffers: [{ sku: selectedPlanId, offerToken }],
-              }),
+            console.log('OnboardingPaywallPanel: Processing purchase', {
+              isSubscription,
+              productId: iapProduct.productId,
             });
-            // If successful (no error thrown), we assume success or pending
-            onPressContinue(selectedPlanId);
-            return;
+
+            if (isSubscription) {
+              // For Android, we might need offerToken if available
+              let offerToken;
+              if (Platform.OS === 'android') {
+                offerToken = (iapProduct as any).subscriptionOfferDetails?.[0]
+                  ?.offerToken;
+              }
+
+              console.log('OnboardingPaywallPanel: Requesting subscription', {
+                sku: selectedPlanId,
+                offerToken,
+              });
+              await requestSubscription({
+                sku: selectedPlanId,
+                ...(offerToken && {
+                  subscriptionOffers: [{ sku: selectedPlanId, offerToken }],
+                }),
+              });
+            } else {
+              console.log(
+                'OnboardingPaywallPanel: Requesting one-time purchase',
+                { sku: selectedPlanId }
+              );
+              await requestPurchase({
+                sku: selectedPlanId,
+              });
+            }
+          } else {
+            // Fallback if product not found in fetched list but ID exists
+            // Try subscription first as default legacy behavior
+            console.log(
+              'OnboardingPaywallPanel: Product not in IAP list, attempting fallback purchase',
+              selectedPlanId
+            );
+            try {
+              console.log(
+                'OnboardingPaywallPanel: Fallback - attempting requestSubscription',
+                selectedPlanId
+              );
+              await requestSubscription({ sku: selectedPlanId });
+            } catch (subErr) {
+              console.warn(
+                'OnboardingPaywallPanel: Fallback requestSubscription failed',
+                subErr
+              );
+              console.log(
+                'OnboardingPaywallPanel: Fallback - attempting requestPurchase',
+                selectedPlanId
+              );
+              try {
+                await requestPurchase({ sku: selectedPlanId });
+              } catch (purchErr) {
+                console.warn(
+                  'OnboardingPaywallPanel: Fallback requestPurchase failed',
+                  purchErr
+                );
+                throw purchErr;
+              }
+            }
           }
         } catch (err) {
-          console.log('Purchase failed', err);
-          // Optionally alert user?
-          // Alert.alert('Purchase Failed', (err as any).message);
-          // We allow fallback to onPressContinue? No, usually we stop.
+          console.warn('Purchase Error:', err);
+          if (typeof err === 'object') {
+            console.warn(
+              'Purchase Error Details:',
+              JSON.stringify(err, null, 2)
+            );
+          }
           return;
         }
       }
-
       onPressContinue(selectedPlanId);
     };
 
@@ -329,22 +500,22 @@ const createStyles = (theme: Theme) =>
     },
     sheetContainer: {
       flex: 1,
-      marginTop: -6,
+      marginTop: -24,
       backgroundColor: theme.bg.secondary,
-      borderTopLeftRadius: 32,
-      borderTopRightRadius: 32,
-      overflow: 'hidden',
+      borderTopLeftRadius: 30,
+      borderTopRightRadius: 30,
+      overflow: 'scroll',
     },
     container: {
       flex: 1,
     },
     contentContainer: {
-      paddingBottom: 40,
+      paddingBottom: 24,
     },
     footerContainer: {
-      paddingHorizontal: 16,
-      paddingBottom: 40,
-      paddingTop: 16,
+      paddingHorizontal: 8,
+      marginBottom: 40,
+      paddingTop: 4,
       backgroundColor: theme.bg.secondary,
     },
     contentWrapper: {
