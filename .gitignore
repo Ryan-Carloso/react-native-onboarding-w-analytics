@@ -4,7 +4,7 @@
 
 # XDE
 .expo/
-
+.yarnrc.yml
 # VSCode
 .vscode/
 jsconfig.json

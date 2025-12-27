@@ -39,7 +39,7 @@
     "prepack": "sed -i '' '1s|.*|![Banner](assets/banner.png)|' README.md",
     "postpack": "git checkout README.md",
     "release": "release-it --only-version",
-    "watch:yalc": "nodemon --watch src --ext ts,tsx,js,json --exec 'npm run prepare && yalc push'"
+    "yalc:watch": "nodemon --watch src --ext ts,tsx,js,json --exec 'npm run prepare && yalc push'"
   },
   "keywords": [
     "react-native",

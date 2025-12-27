@@ -25,6 +25,7 @@ import type { Theme } from '../../utils/theme';
 import PrimaryButton from '../buttons/PrimaryButton';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
 import type { OnboardingPaywallPanelProps, PlatformSku } from '../types';
+import Skeleton from './Skeleton';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -74,8 +75,13 @@ function OnboardingPaywallPanel({
     []
   );
 
+  // Determine if we need to fetch data
+  const shouldFetch = !!(products?.length || subscriptionSkus);
+  const [isLoading, setIsLoading] = useState(shouldFetch);
+
   useEffect(() => {
     let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
 
     const fetchIapProducts = async (skus: string[]) => {
       try {
@@ -95,47 +101,63 @@ function OnboardingPaywallPanel({
             new Map(allItems.map((item) => [item.productId, item])).values()
           );
           setIapProducts(uniqueItems);
+          setIsLoading(false);
         }
       } catch (err) {
         console.warn('IAP Error:', err);
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    if (products && products.length > 0) {
-      // Collect all SKUs from all products for current platform
-      const allSkus = products.flatMap((p) => {
-        if (Array.isArray(p.SKus)) {
-          return p.SKus;
+    if (shouldFetch) {
+      // Set 120s timeout
+      timeoutId = setTimeout(() => {
+        if (isMounted) {
+          console.warn('IAP Fetch Timeout (120s) - showing partial data');
+          setIsLoading(false);
         }
-        const skusObj = p.SKus as PlatformSku;
-        const skus = Platform.select({
-          ios: skusObj.ios,
-          android: skusObj.android,
+      }, 120000);
+
+      // Collect all SKUs from all products for current platform
+      let allSkus: string[] = [];
+
+      if (products && products.length > 0) {
+        allSkus = products.flatMap((p) => {
+          if (Array.isArray(p.SKus)) {
+            return p.SKus;
+          }
+          const skusObj = p.SKus as PlatformSku;
+          const skus = Platform.select({
+            ios: skusObj.ios,
+            android: skusObj.android,
+          });
+          return skus || [];
         });
-        return skus || [];
-      });
+      } else if (subscriptionSkus) {
+        const skus = Platform.select({
+          ios: subscriptionSkus.ios,
+          android: subscriptionSkus.android,
+        });
+        if (skus) allSkus = skus;
+      }
 
       if (allSkus.length > 0) {
         fetchIapProducts(allSkus);
+      } else {
+        setIsLoading(false);
       }
-    } else if (subscriptionSkus) {
-      const skus = Platform.select({
-        ios: subscriptionSkus.ios,
-        android: subscriptionSkus.android,
-      });
-
-      if (skus && skus.length > 0) {
-        fetchIapProducts(skus);
-      }
+    } else {
+      setIsLoading(false);
     }
 
     return () => {
       isMounted = false;
-      if (subscriptionSkus || products) {
+      clearTimeout(timeoutId);
+      if (shouldFetch) {
         endConnection();
       }
     };
-  }, [subscriptionSkus, products]);
+  }, [subscriptionSkus, products, shouldFetch]);
 
   const displayPlans = useMemo(() => {
     // New Configuration Mode
@@ -227,6 +249,13 @@ function OnboardingPaywallPanel({
   const selectedPlan = displayPlans.find((p) => p.id === selectedPlanId);
 
   const renderTitle = () => {
+    if (isLoading) {
+      return (
+        <View style={{ alignItems: 'center', marginBottom: 8 }}>
+          <Skeleton width={200} height={32} style={{ borderRadius: 8 }} />
+        </View>
+      );
+    }
     if (!title) return null;
     if (typeof title === 'string') {
       return (
@@ -239,6 +268,18 @@ function OnboardingPaywallPanel({
   };
 
   const renderSubtitle = () => {
+    if (isLoading) {
+      return (
+        <View style={{ alignItems: 'center', marginTop: 8 }}>
+          <Skeleton
+            width={280}
+            height={16}
+            style={{ borderRadius: 4, marginBottom: 4 }}
+          />
+          <Skeleton width={180} height={16} style={{ borderRadius: 4 }} />
+        </View>
+      );
+    }
     if (!subtitle) return null;
     if (typeof subtitle === 'string') {
       return (
@@ -251,6 +292,22 @@ function OnboardingPaywallPanel({
   };
 
   const renderFeatures = () => {
+    if (isLoading) {
+      return (
+        <View style={styles.featuresContainer}>
+          {[1, 2, 3].map((i) => (
+            <View key={i} style={styles.featureRow}>
+              <Skeleton
+                width={20}
+                height={20}
+                style={{ borderRadius: 10, marginRight: 12 }}
+              />
+              <Skeleton width={200} height={16} style={{ borderRadius: 4 }} />
+            </View>
+          ))}
+        </View>
+      );
+    }
     if (!selectedPlan?.features || selectedPlan.features.length === 0)
       return null;
 
@@ -266,7 +323,45 @@ function OnboardingPaywallPanel({
     );
   };
 
+  const renderSkeletonPlans = () => {
+    return (
+      <View style={styles.plansContainer}>
+        {[1, 2, 3].map((key) => (
+          <View
+            key={key}
+            style={[styles.planCard, { opacity: 1, padding: 16 }]}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {/* Radio button placeholder */}
+              <Skeleton
+                width={24}
+                height={24}
+                style={{ borderRadius: 12, marginRight: 12 }}
+              />
+              <View>
+                {/* Title */}
+                <Skeleton
+                  width={100}
+                  height={16}
+                  style={{ marginBottom: 6, borderRadius: 4 }}
+                />
+                {/* Interval/Subtitle */}
+                <Skeleton width={60} height={12} style={{ borderRadius: 4 }} />
+              </View>
+            </View>
+            {/* Price */}
+            <Skeleton width={70} height={20} style={{ borderRadius: 4 }} />
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   const renderPlans = () => {
+    if (isLoading) {
+      return renderSkeletonPlans();
+    }
+
     return (
       <View style={styles.plansContainer}>
         {displayPlans.map((plan) => {

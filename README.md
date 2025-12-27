@@ -25,10 +25,11 @@ A private AI app that runs entirely offline on your device, with no data sent to
 npm install rn-onboarding-analytics
 ```
 
-The library requires these dependencies for animations and safe area context:
+The library requires these dependencies :
 
 ```sh
 npm install react-native-reanimated react-native-safe-area-context expo-constants expo-localization react-native-iap
+
 ```
 
 ```
@@ -513,12 +514,6 @@ A private AI app that runs entirely offline on your device, with no data sent to
 
 ```sh
 npm install rn-onboarding-analytics
-```
-
-The library requires these dependencies for animations and safe area context:
-
-```sh
-npm install react-native-reanimated react-native-safe-area-context
 ```
 
 Optionally for image support, install one of:
