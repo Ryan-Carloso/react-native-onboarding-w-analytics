@@ -182,6 +182,7 @@ function OnboardingPaywallPanel({
           features: config.featues,
           interval: '', // Could be inferred from IAP if needed
           sortOrder: config.sortOrder,
+          helperText: config.helperText,
         };
       });
 
@@ -295,6 +296,16 @@ function OnboardingPaywallPanel({
                   >
                     {plan.interval}
                   </Text>
+                )}
+                {/* Helper Text Rendering */}
+                {plan.helperText && (
+                  <View style={styles.helperTextContainer}>
+                    <Text style={styles.helperTextBadge}>
+                      {plan.helperText.length > 15
+                        ? plan.helperText.substring(0, 15).trim() + '...'
+                        : plan.helperText}
+                    </Text>
+                  </View>
                 )}
               </View>
               <Text
@@ -640,6 +651,19 @@ const createStyles = (theme: Theme) =>
     },
     planPriceSelected: {
       color: theme.bg.accent,
+    },
+    helperTextContainer: {
+      marginTop: 4,
+      backgroundColor: theme.bg.accent,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+      alignSelf: 'flex-start',
+    },
+    helperTextBadge: {
+      color: theme.text.contrast,
+      fontSize: fontSizes.xs,
+      fontWeight: '600',
     },
     helperText: {
       textAlign: 'center',

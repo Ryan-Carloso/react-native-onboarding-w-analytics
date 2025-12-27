@@ -134,6 +134,12 @@ type OnboardingStepDefault = {
 
   /** Placement of the image relative to content. */
   position: 'top' | 'bottom';
+
+  /** Optional: Override global showBackButton for this step */
+  showBackButton?: boolean;
+
+  /** Optional: Override global backButtonIcon for this step */
+  backButtonIcon?: ReactNode;
 };
 
 type OnboardingStepCustom = {
@@ -188,6 +194,9 @@ export interface OnboardingStepPanelProps {
 
   /** Controls visibility of the back button. */
   showBackButton?: boolean;
+
+  /** Custom icon for the back button. */
+  backButtonIcon?: ReactNode;
 }
 
 type OnboardingIntroPanel =
@@ -255,6 +264,9 @@ export interface OnboardingProps {
    */
   isDev?: boolean;
 
+  /** Custom icon for the back button. */
+  backButtonIcon?: ReactNode;
+
   /**
    * Optional Paywall panel content.
    * If provided, it will be shown after the last step.
@@ -273,6 +285,7 @@ export interface PaywallPlan {
   price: string;
   interval?: string;
   features?: string[];
+  helperText?: string;
 }
 
 /**
@@ -290,6 +303,9 @@ export interface PaywallProductConfig {
 
   /** Numeric or alphanumeric sorting preference. */
   sortOrder: number | string;
+
+  /** Optional helper text (max 15 chars). */
+  helperText?: string;
 }
 
 /**

@@ -1,11 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../utils/ThemeContext';
 import { type Theme } from '../../utils/theme';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
 import PrimaryButton from '../buttons/PrimaryButton';
 import SecondaryButton from '../buttons/SecondaryButton';
-import ArrowLeftIcon from '../icons/ArrowLeftIcon';
 import type { OnboardingStepPanelProps } from '../types';
 
 function OnboardingStepPanel({
@@ -17,7 +16,8 @@ function OnboardingStepPanel({
   onNextPress,
   buttonPrimary,
   showBackButton = true,
-}: OnboardingStepPanelProps) {
+  backButtonIcon,
+}: OnboardingStepPanelProps & { backButtonIcon?: ReactNode }) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -38,7 +38,7 @@ function OnboardingStepPanel({
             <SecondaryButton
               text=""
               onPress={onBackPress}
-              icon={<ArrowLeftIcon color={theme.text.primary} />}
+              icon={backButtonIcon}
             />
           </View>
         )}
