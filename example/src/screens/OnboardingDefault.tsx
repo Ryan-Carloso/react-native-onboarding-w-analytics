@@ -71,8 +71,7 @@ export default function OnboardingDefault({ navigation }: Props) {
         navigation.goBack();
       }}
       onStepChange={() => {}}
-      showCloseButton
-      showBackButton
+      showBackButton={true}
     />
   );
 }

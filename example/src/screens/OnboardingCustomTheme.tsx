@@ -66,7 +66,6 @@ export default function OnboardingCustomTheme({ navigation }: Props) {
       }}
       onSkip={() => navigation.goBack()}
       onStepChange={() => {}}
-      showCloseButton
       showBackButton
       apiKey="apiKey-websiteTRACKER"
     />

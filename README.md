@@ -250,15 +250,6 @@ onStepChange={(stepIndex) => {
 }}
 ```
 
-#### `showCloseButton`
-
-**Type:** `boolean`  
-**Default:** `true` - Whether to show the close button in the header
-
-```tsx
-showCloseButton={false} // Hide close button
-```
-
 #### `showBackButton`
 
 **Type:** `boolean`  
@@ -721,16 +712,6 @@ onStepChange={(stepIndex) => {
   // Track progress
   analytics.track('onboarding_step', { step: stepIndex });
 }}
-```
-
-#### `showCloseButton`
-
-**Type:** `boolean`  
-**Default:** `true` - Whether to show the close button in the header
-
-```tsx
-showCloseButton={false} // Hide close button
-```
 
 #### `showBackButton`
 

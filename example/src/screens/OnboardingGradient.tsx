@@ -211,7 +211,6 @@ export default function OnboardingGradient({ navigation }: Props) {
         navigation.goBack();
       }}
       onStepChange={() => {}}
-      showCloseButton
       showBackButton
       skipButton={({ onPress }) => <SkipButton onPress={onPress} />}
       apiKey="apiKey-websiteTRACKER"
