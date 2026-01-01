@@ -13,46 +13,46 @@ export interface OnboardingColors {
   /**
    * Background colors used across the UI.
    */
-  background: {
+  background?: {
     /**
      * Primary page/screen background color.
      */
-    primary: string;
+    primary?: string;
 
     /**
      * Background for panels or cards.
      */
-    secondary: string;
+    secondary?: string;
 
     /**
      * Subtle background for labels.
      */
-    label: string;
+    label?: string;
 
     /**
      * Accented background for emphasis areas.
      */
-    accent: string;
+    accent?: string;
   };
 
   /**
    * Text colors used for typography.
    */
-  text: {
+  text?: {
     /**
      * Default body text color for readability on `background.primary`.
      */
-    primary: string;
+    primary?: string;
 
     /**
      * Subdued text color for secondary information.
      */
-    secondary: string;
+    secondary?: string;
 
     /**
      * High-contrast text color intended for buttons/overlays.
      */
-    contrast: string;
+    contrast?: string;
   };
 }
 
@@ -378,6 +378,26 @@ export interface OnboardingPaywallPanelProps {
    * If provided, a close button will be rendered in the header.
    */
   onClose?: () => void;
+
+  /**
+   * Design variation for A/B testing.
+   */
+  design?: 'design1' | 'design2';
+
+  /**
+   * Theme colors to use for styling the paywall.
+   */
+  colors?: Partial<OnboardingColors>;
+
+  /**
+   * API Key for analytics.
+   */
+  apiKey?: string;
+
+  /**
+   * If true, analytics events will be logged to console but not sent to the server.
+   */
+  isDev?: boolean;
 }
 
 type OnboardingPaywallPanelConfig =

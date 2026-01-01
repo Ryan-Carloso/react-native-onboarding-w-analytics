@@ -27,15 +27,15 @@ export const LightTheme = {
 
 export const DarkTheme = {
   bg: {
-    primary: '#0A84FF',
-    secondary: '#000000',
+    primary: '#000000',
+    secondary: '#1C1C1E',
     label: '#2C2C2E',
     accent: '#0A84FF',
   },
   text: {
     primary: '#FFFFFF',
     secondary: '#8E8E93',
-    contrast: '#000000',
+    contrast: '#FFFFFF',
   },
   fonts: {
     introTitle: 'System',

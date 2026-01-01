@@ -94,7 +94,7 @@ const createStyles = (theme: Theme) =>
       color: theme.text.primary,
     },
     line2: {
-      color: theme.bg.primary,
+      color: theme.text.contrast,
     },
     titleText: {
       fontFamily: theme.fonts.introTitle,

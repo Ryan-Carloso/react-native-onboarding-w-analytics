@@ -10,6 +10,10 @@ import {
   Platform,
 } from 'react-native';
 import {
+  useSafeAreaInsets,
+  SafeAreaView,
+} from 'react-native-safe-area-context';
+import {
   initConnection,
   getSubscriptions,
   getProducts,
@@ -27,6 +31,7 @@ import SkipButton from '../buttons/SkipButton';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
 import type { OnboardingPaywallPanelProps, PlatformSku } from '../types';
 import Skeleton from './Skeleton';
+import { trackEvent } from '../analytics';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -45,9 +50,17 @@ function OnboardingPaywallPanel({
   onPrivacy,
   subscriptionSkus,
   onPurchaseResult,
+  apiKey,
+  isDev,
+  colors,
+  design,
 }: OnboardingPaywallPanelProps) {
   const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(
+    () => createStyles(theme, colors, !!image, insets),
+    [theme, colors, image, insets]
+  );
 
   // Initialize selectedPlanId based on available configuration
   const initialPlanId = useMemo(() => {
@@ -509,6 +522,17 @@ function OnboardingPaywallPanel({
               data: result,
             });
           }
+
+          // Track successful purchase
+          trackEvent(
+            apiKey,
+            'purchase_success',
+            {
+              plan_id: selectedPlanId,
+              design,
+            },
+            isDev
+          );
         } catch (err) {
           console.warn('Purchase Error:', err);
           if (typeof err === 'object') {
@@ -580,19 +604,21 @@ function OnboardingPaywallPanel({
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <SafeAreaView style={styles.mainContainer} edges={['top', 'bottom']}>
       {onClose && (
         <View style={styles.closeButton} pointerEvents="box-none">
           <SkipButton onPress={handleClose} />
         </View>
       )}
-      <View style={styles.headerImageContainer}>
-        {typeof image === 'function'
-          ? image()
-          : image && (
-              <Image source={image} style={styles.image} resizeMode="cover" />
-            )}
-      </View>
+      {image && (
+        <View style={styles.headerImageContainer}>
+          {typeof image === 'function'
+            ? image()
+            : image && (
+                <Image source={image} style={styles.image} resizeMode="cover" />
+              )}
+        </View>
+      )}
 
       <View style={styles.sheetContainer}>
         <ScrollView
@@ -622,21 +648,26 @@ function OnboardingPaywallPanel({
           {renderButton()}
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 export default OnboardingPaywallPanel;
 
-const createStyles = (theme: Theme) =>
+const createStyles = (
+  theme: Theme,
+  colors?: OnboardingPaywallPanelProps['colors'],
+  hasImage?: boolean,
+  insets?: { top: number; bottom: number; left: number; right: number }
+) =>
   StyleSheet.create({
     mainContainer: {
       flex: 1,
-      backgroundColor: theme.bg.secondary,
+      backgroundColor: colors?.background?.primary || theme.bg.secondary,
     },
     closeButton: {
       position: 'absolute',
-      top: (theme.insets?.top || 0) + 16,
+      top: (insets?.top || 0) + 8,
       right: 16,
       zIndex: 20,
     },
@@ -646,11 +677,11 @@ const createStyles = (theme: Theme) =>
     },
     sheetContainer: {
       flex: 1,
-      marginTop: -24,
-      backgroundColor: theme.bg.secondary,
-      borderTopLeftRadius: 30,
-      borderTopRightRadius: 30,
-      overflow: 'scroll',
+      marginTop: hasImage ? -24 : 0,
+      backgroundColor: colors?.background?.secondary || theme.bg.secondary,
+      borderTopLeftRadius: hasImage ? 30 : 0,
+      borderTopRightRadius: hasImage ? 30 : 0,
+      overflow: 'hidden',
     },
     container: {
       flex: 1,
@@ -660,13 +691,13 @@ const createStyles = (theme: Theme) =>
     },
     footerContainer: {
       paddingHorizontal: 8,
-      marginBottom: 40,
+      marginBottom: Platform.OS === 'ios' ? 0 : 40,
       paddingTop: 4,
-      backgroundColor: theme.bg.secondary,
+      backgroundColor: colors?.background?.secondary || theme.bg.secondary,
     },
     contentWrapper: {
       paddingHorizontal: 16,
-      paddingTop: 32,
+      paddingTop: hasImage ? 32 : 60,
     },
     image: {
       width: '100%',
@@ -683,11 +714,11 @@ const createStyles = (theme: Theme) =>
       textAlign: 'center',
     },
     line1: {
-      color: theme.text.primary,
+      color: colors?.text?.primary || theme.text.primary,
     },
     line2: {
       marginTop: 8,
-      color: theme.text.secondary,
+      color: colors?.text?.secondary || theme.text.secondary,
       fontSize: fontSizes.md,
       lineHeight: lineHeights.md,
     },
@@ -696,6 +727,8 @@ const createStyles = (theme: Theme) =>
       fontWeight: 'bold',
     },
     subtitleText: {
+      color: colors?.text?.secondary || theme.text.secondary,
+      textAlign: 'center',
       fontFamily: theme.fonts.introSubtitle,
     },
     featuresContainer: {
@@ -708,14 +741,14 @@ const createStyles = (theme: Theme) =>
       marginBottom: 12,
     },
     checkIcon: {
-      color: theme.bg.accent,
+      color: colors?.background?.accent || theme.bg.accent,
       fontSize: fontSizes.lg,
       marginRight: 12,
       fontWeight: 'bold',
     },
     featureText: {
-      color: theme.text.primary,
       fontSize: fontSizes.md,
+      color: colors?.text?.primary || theme.text.primary,
       fontWeight: '500',
     },
     plansContainer: {
@@ -724,15 +757,14 @@ const createStyles = (theme: Theme) =>
     },
     planCard: {
       flexDirection: 'row',
-      alignItems: 'center',
       justifyContent: 'space-between',
+      alignItems: 'center',
       padding: 16,
       minHeight: 76,
       borderRadius: 16,
-      backgroundColor: theme.bg.secondary,
       borderWidth: 1,
-      borderColor: theme.bg.label,
-      // Shadow for elevation
+      borderColor: colors?.background?.label || theme.bg.label,
+      backgroundColor: colors?.background?.primary || theme.bg.secondary,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
@@ -740,54 +772,47 @@ const createStyles = (theme: Theme) =>
       elevation: 2,
     },
     planCardSelected: {
-      borderColor: theme.bg.accent,
-      backgroundColor: theme.bg.label,
+      borderColor: colors?.background?.accent || theme.bg.accent,
+      backgroundColor: colors?.background?.label || theme.bg.label,
       borderWidth: 2,
     },
     planTitle: {
       fontSize: fontSizes.md,
       fontWeight: '600',
-      color: theme.text.primary,
+      color: colors?.text?.primary || theme.text.primary,
     },
     planTitleSelected: {
-      color: theme.text.primary,
+      color: colors?.text?.primary || theme.text.primary,
       fontWeight: '700',
     },
     planInterval: {
       fontSize: fontSizes.sm,
-      color: theme.text.secondary,
+      color: colors?.text?.secondary || theme.text.secondary,
       marginTop: 2,
     },
     planIntervalSelected: {
-      color: theme.text.secondary,
+      color: colors?.text?.secondary || theme.text.secondary,
     },
     planPrice: {
       fontSize: fontSizes.lg,
       fontWeight: '700',
-      color: theme.text.primary,
+      color: colors?.text?.primary || theme.text.primary,
     },
     planPriceSelected: {
-      color: theme.bg.accent,
+      color: colors?.background?.accent || theme.bg.accent,
     },
     helperTextContainer: {
       marginTop: 4,
-      backgroundColor: theme.bg.accent,
+      backgroundColor: colors?.background?.accent || theme.bg.accent,
       paddingHorizontal: 8,
       paddingVertical: 2,
       borderRadius: 4,
       alignSelf: 'flex-start',
     },
     helperTextBadge: {
-      color: theme.text.contrast,
       fontSize: fontSizes.xs,
+      color: colors?.text?.contrast || theme.text.contrast,
       fontWeight: '600',
-    },
-    helperText: {
-      textAlign: 'center',
-      color: theme.text.secondary,
-      fontSize: fontSizes.sm,
-      marginBottom: 8,
-      fontWeight: '500',
     },
     footerLinksContainer: {
       flexDirection: 'row',
@@ -795,13 +820,23 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       marginTop: 4,
       gap: 8,
+      flexWrap: 'wrap',
     },
     footerLinkText: {
       fontSize: fontSizes.md,
-      color: theme.text.secondary,
+      color: colors?.text?.secondary || theme.text.secondary,
+      padding: 4,
     },
     footerLinkSeparator: {
       fontSize: fontSizes.xs,
       color: theme.text.secondary,
+      marginHorizontal: 4,
+    },
+    helperText: {
+      fontSize: fontSizes.sm,
+      color: colors?.text?.secondary || theme.text.secondary,
+      textAlign: 'center',
+      marginBottom: 8,
+      fontWeight: '500',
     },
   });

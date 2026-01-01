@@ -34,6 +34,7 @@ function SpillOnboarding({
   isDev,
   paywallPanel: paywallPanelProps,
   backButtonIcon,
+  colors,
 }: OnboardingProps) {
   const { theme } = useTheme();
 
@@ -202,6 +203,9 @@ function SpillOnboarding({
       <OnboardingPaywallPanel
         onPressContinue={handleContinue}
         onClose={handleClose}
+        apiKey={apiKey}
+        isDev={isDev}
+        colors={colors}
         {...otherProps}
       />
     );
@@ -227,7 +231,7 @@ function SpillOnboarding({
         buttonLabel={currentStep.buttonLabel}
         onBackPress={onBackPress}
         onNextPress={onNextPress}
-        buttonPrimary={step === steps.length - 1}
+        buttonPrimary={false}
         showBackButton={currentStep.showBackButton ?? showBackButton}
         backButtonIcon={currentStep.backButtonIcon ?? backButtonIcon}
       />
