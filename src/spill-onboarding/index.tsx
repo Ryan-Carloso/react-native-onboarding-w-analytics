@@ -18,6 +18,7 @@ import { type OnboardingProps } from './types';
 import useMeasureHeight from './hooks/useMeasureHeight';
 import { type Theme } from '../utils/theme';
 import { trackEvent } from './analytics';
+import { useLogDev } from './hooks/useLogDev';
 
 function SpillOnboarding({
   animationDuration = 500,
@@ -37,6 +38,7 @@ function SpillOnboarding({
   colors,
 }: OnboardingProps) {
   const { theme } = useTheme();
+  const logDev = useLogDev(!!isDev);
 
   const styles = useMemo(() => createStyles(theme), [theme]);
   const backgroundSpillProgress = useSharedValue(0);
@@ -68,7 +70,7 @@ function SpillOnboarding({
       const fromStepName = getStepName(step);
       const toStepName = getStepName(stepNumber);
 
-      console.log('🔄 Onboarding Step Change:', {
+      logDev('Onboarding Step Change:', {
         from: fromStepName,
         to: toStepName,
         index: stepNumber,
@@ -89,7 +91,7 @@ function SpillOnboarding({
         isDev
       );
     },
-    [onStepChangeProps, apiKey, step, steps, isDev]
+    [onStepChangeProps, apiKey, step, steps, isDev, logDev]
   );
 
   useEffect(() => {

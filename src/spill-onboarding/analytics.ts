@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as Localization from 'expo-localization';
+import { logDevMessage } from './hooks/useLogDev';
 
 // TODO: need to get an better domain
 const API_URL = 'https://api.freesupabase.shop/api/track';
@@ -43,10 +44,7 @@ export const trackEvent = async (
   };
 
   if (isDev) {
-    console.log(
-      '🚧 [Dev Mode] Analytics Event (Not Sent):',
-      JSON.stringify(payload, null, 2)
-    );
+    logDevMessage(isDev, 'Analytics Event (Not Sent):', payload);
     return;
   }
 

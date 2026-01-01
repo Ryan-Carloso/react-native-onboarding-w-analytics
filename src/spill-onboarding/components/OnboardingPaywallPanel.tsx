@@ -32,6 +32,7 @@ import { fontSizes, lineHeights } from '../../utils/fontStyles';
 import type { OnboardingPaywallPanelProps, PlatformSku } from '../types';
 import Skeleton from './Skeleton';
 import { trackEvent } from '../analytics';
+import { useLogDev } from '../hooks/useLogDev';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -61,6 +62,8 @@ function OnboardingPaywallPanel({
     () => createStyles(theme, colors, !!image, insets),
     [theme, colors, image, insets]
   );
+
+  const logDev = useLogDev(!!isDev);
 
   // Initialize selectedPlanId based on available configuration
   const initialPlanId = useMemo(() => {
@@ -435,7 +438,19 @@ function OnboardingPaywallPanel({
 
   const renderButton = () => {
     const handlePress = async () => {
-      console.log('OnboardingPaywallPanel: handlePress', { selectedPlanId });
+      logDev('OnboardingPaywallPanel: handlePress', { selectedPlanId });
+
+      // Track purchase attempt
+      trackEvent(
+        apiKey,
+        'purchase_attempt',
+        {
+          plan_id: selectedPlanId,
+          design,
+        },
+        isDev
+      );
+
       if ((subscriptionSkus || products) && selectedPlanId) {
         try {
           let result;
@@ -449,7 +464,7 @@ function OnboardingPaywallPanel({
               'subscriptionPeriodNumberIOS' in iapProduct ||
               'subscriptionOfferDetails' in iapProduct;
 
-            console.log('OnboardingPaywallPanel: Processing purchase', {
+            logDev('OnboardingPaywallPanel: Processing purchase', {
               isSubscription,
               productId: iapProduct.productId,
             });
@@ -462,7 +477,7 @@ function OnboardingPaywallPanel({
                   ?.offerToken;
               }
 
-              console.log('OnboardingPaywallPanel: Requesting subscription', {
+              logDev('OnboardingPaywallPanel: Requesting subscription', {
                 sku: selectedPlanId,
                 offerToken,
               });
@@ -473,10 +488,9 @@ function OnboardingPaywallPanel({
                 }),
               });
             } else {
-              console.log(
-                'OnboardingPaywallPanel: Requesting one-time purchase',
-                { sku: selectedPlanId }
-              );
+              logDev('OnboardingPaywallPanel: Requesting one-time purchase', {
+                sku: selectedPlanId,
+              });
               result = await requestPurchase({
                 sku: selectedPlanId,
               });
@@ -484,12 +498,12 @@ function OnboardingPaywallPanel({
           } else {
             // Fallback if product not found in fetched list but ID exists
             // Try subscription first as default legacy behavior
-            console.log(
+            logDev(
               'OnboardingPaywallPanel: Product not in IAP list, attempting fallback purchase',
               selectedPlanId
             );
             try {
-              console.log(
+              logDev(
                 'OnboardingPaywallPanel: Fallback - attempting requestSubscription',
                 selectedPlanId
               );
@@ -499,7 +513,7 @@ function OnboardingPaywallPanel({
                 'OnboardingPaywallPanel: Fallback requestSubscription failed',
                 subErr
               );
-              console.log(
+              logDev(
                 'OnboardingPaywallPanel: Fallback - attempting requestPurchase',
                 selectedPlanId
               );
@@ -534,13 +548,21 @@ function OnboardingPaywallPanel({
             isDev
           );
         } catch (err) {
-          console.warn('Purchase Error:', err);
-          if (typeof err === 'object') {
-            console.warn(
-              'Purchase Error Details:',
-              JSON.stringify(err, null, 2)
-            );
-          }
+          logDev('PaywallScreen: Purchase failed', err);
+
+          // Track failed purchase
+          trackEvent(
+            apiKey,
+            'purchase_failed',
+            {
+              plan_id: selectedPlanId,
+              design,
+              error:
+                typeof err === 'object' ? JSON.stringify(err) : String(err),
+            },
+            isDev
+          );
+
           if (onPurchaseResult) {
             onPurchaseResult({
               status: 'error',
@@ -595,7 +617,15 @@ function OnboardingPaywallPanel({
   };
 
   const handleClose = () => {
-    console.log('[OnboardingPaywallPanel] Close button pressed');
+    logDev('[OnboardingPaywallPanel] Close button pressed');
+    trackEvent(
+      apiKey,
+      'paywall_close',
+      {
+        design,
+      },
+      isDev
+    );
     if (onClose) {
       onClose();
     } else {
@@ -669,126 +699,111 @@ const createStyles = (
       position: 'absolute',
       top: (insets?.top || 0) + 8,
       right: 16,
-      zIndex: 20,
+      zIndex: 10,
     },
     headerImageContainer: {
-      height: screenHeight * 0.3,
+      height: screenHeight * 0.35,
       width: '100%',
+    },
+    image: {
+      width: '100%',
+      height: '100%',
     },
     sheetContainer: {
       flex: 1,
+      backgroundColor: colors?.background?.primary || theme.bg.secondary,
+      borderTopLeftRadius: hasImage ? 24 : 0,
+      borderTopRightRadius: hasImage ? 24 : 0,
       marginTop: hasImage ? -24 : 0,
-      backgroundColor: colors?.background?.secondary || theme.bg.secondary,
-      borderTopLeftRadius: hasImage ? 30 : 0,
-      borderTopRightRadius: hasImage ? 30 : 0,
       overflow: 'hidden',
     },
     container: {
       flex: 1,
     },
     contentContainer: {
-      paddingBottom: 24,
-    },
-    footerContainer: {
-      paddingHorizontal: 8,
-      marginBottom: Platform.OS === 'ios' ? 0 : 40,
-      paddingTop: 4,
-      backgroundColor: colors?.background?.secondary || theme.bg.secondary,
+      padding: 24,
+      paddingTop: hasImage ? 32 : (insets?.top || 0) + 40,
+      paddingBottom: 120, // Add padding for footer
     },
     contentWrapper: {
-      paddingHorizontal: 16,
-      paddingTop: hasImage ? 32 : 60,
-    },
-    image: {
-      width: '100%',
-      height: '100%',
+      flex: 1,
     },
     headerContainer: {
       alignItems: 'center',
-      marginBottom: 24,
-      marginTop: 8,
+      marginBottom: 32,
     },
     text: {
-      fontSize: fontSizes.xxl,
-      lineHeight: lineHeights.xxl,
       textAlign: 'center',
-    },
-    line1: {
       color: colors?.text?.primary || theme.text.primary,
     },
+    line1: {
+      fontSize: fontSizes.xl,
+      fontWeight: '700',
+      marginBottom: 12,
+      lineHeight: lineHeights.xl,
+    },
     line2: {
-      marginTop: 8,
-      color: colors?.text?.secondary || theme.text.secondary,
       fontSize: fontSizes.md,
+      color: colors?.text?.secondary || theme.text.secondary,
       lineHeight: lineHeights.md,
+      marginTop: 4,
     },
     titleText: {
-      fontFamily: theme.fonts.introTitle,
-      fontWeight: 'bold',
+      color: colors?.text?.primary || theme.text.primary,
     },
     subtitleText: {
       color: colors?.text?.secondary || theme.text.secondary,
-      textAlign: 'center',
-      fontFamily: theme.fonts.introSubtitle,
     },
     featuresContainer: {
-      marginBottom: 24,
-      paddingHorizontal: 8,
+      marginBottom: 32,
     },
     featureRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: 16,
     },
     checkIcon: {
+      fontSize: 18,
       color: colors?.background?.accent || theme.bg.accent,
-      fontSize: fontSizes.lg,
       marginRight: 12,
       fontWeight: 'bold',
     },
     featureText: {
       fontSize: fontSizes.md,
       color: colors?.text?.primary || theme.text.primary,
-      fontWeight: '500',
+      flex: 1,
+      lineHeight: lineHeights.md,
     },
     plansContainer: {
-      gap: 12,
       marginBottom: 24,
+      gap: 12,
     },
     planCard: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: 16,
-      minHeight: 76,
-      borderRadius: 16,
+      borderRadius: 12,
       borderWidth: 1,
       borderColor: colors?.background?.label || theme.bg.label,
-      backgroundColor: colors?.background?.primary || theme.bg.secondary,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
+      backgroundColor: 'transparent',
     },
     planCardSelected: {
       borderColor: colors?.background?.accent || theme.bg.accent,
       backgroundColor: colors?.background?.label || theme.bg.label,
-      borderWidth: 2,
     },
     planTitle: {
       fontSize: fontSizes.md,
       fontWeight: '600',
       color: colors?.text?.primary || theme.text.primary,
+      marginBottom: 4,
     },
     planTitleSelected: {
       color: colors?.text?.primary || theme.text.primary,
-      fontWeight: '700',
     },
     planInterval: {
       fontSize: fontSizes.sm,
       color: colors?.text?.secondary || theme.text.secondary,
-      marginTop: 2,
     },
     planIntervalSelected: {
       color: colors?.text?.secondary || theme.text.secondary,
@@ -799,44 +814,44 @@ const createStyles = (
       color: colors?.text?.primary || theme.text.primary,
     },
     planPriceSelected: {
-      color: colors?.background?.accent || theme.bg.accent,
+      color: colors?.text?.primary || theme.text.primary,
     },
-    helperTextContainer: {
-      marginTop: 4,
-      backgroundColor: colors?.background?.accent || theme.bg.accent,
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 4,
-      alignSelf: 'flex-start',
+    footerContainer: {
+      padding: 24,
+      paddingBottom: (insets?.bottom || 0) + 16,
+      borderTopWidth: 1,
+      borderTopColor: colors?.background?.label || theme.bg.label,
+      backgroundColor: colors?.background?.primary || theme.bg.secondary,
     },
-    helperTextBadge: {
+    helperText: {
+      textAlign: 'center',
       fontSize: fontSizes.xs,
-      color: colors?.text?.contrast || theme.text.contrast,
-      fontWeight: '600',
+      color: colors?.text?.secondary || theme.text.secondary,
+      marginBottom: 16,
     },
     footerLinksContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 4,
-      gap: 8,
-      flexWrap: 'wrap',
+      marginTop: 24,
+      marginBottom: 12,
     },
     footerLinkText: {
-      fontSize: fontSizes.md,
+      fontSize: fontSizes.xs,
       color: colors?.text?.secondary || theme.text.secondary,
-      padding: 4,
+      textDecorationLine: 'underline',
     },
     footerLinkSeparator: {
       fontSize: fontSizes.xs,
-      color: theme.text.secondary,
-      marginHorizontal: 4,
-    },
-    helperText: {
-      fontSize: fontSizes.sm,
       color: colors?.text?.secondary || theme.text.secondary,
-      textAlign: 'center',
-      marginBottom: 8,
-      fontWeight: '500',
+      marginHorizontal: 8,
+    },
+    helperTextContainer: {
+      marginTop: 4,
+    },
+    helperTextBadge: {
+      fontSize: fontSizes.xs,
+      color: colors?.background?.accent || theme.bg.accent,
+      fontWeight: '600',
     },
   });
