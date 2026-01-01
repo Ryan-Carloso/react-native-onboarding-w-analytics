@@ -54,3 +54,21 @@ export const defaultTheme = LightTheme;
 
 export type ThemeColors = typeof defaultTheme;
 export type Theme = ThemeColors & { insets: EdgeInsets };
+
+export const resolveTheme = (
+  themeProp: 'light' | 'dark' | undefined,
+  contextTheme: Theme,
+  defaultTo: 'light' | 'dark' | 'context' = 'context'
+): Theme => {
+  if (themeProp === 'light')
+    return { ...LightTheme, insets: contextTheme.insets };
+  if (themeProp === 'dark')
+    return { ...DarkTheme, insets: contextTheme.insets };
+
+  if (defaultTo === 'light')
+    return { ...LightTheme, insets: contextTheme.insets };
+  if (defaultTo === 'dark')
+    return { ...DarkTheme, insets: contextTheme.insets };
+
+  return contextTheme;
+};

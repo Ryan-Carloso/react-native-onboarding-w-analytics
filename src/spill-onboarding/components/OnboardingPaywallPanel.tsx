@@ -25,7 +25,7 @@ import {
   type PurchaseError,
 } from 'react-native-iap';
 import { useTheme } from '../../utils/ThemeContext';
-import type { Theme } from '../../utils/theme';
+import { type Theme, resolveTheme } from '../../utils/theme';
 import PrimaryButton from '../buttons/PrimaryButton';
 import SkipButton from '../buttons/SkipButton';
 import { fontSizes, lineHeights } from '../../utils/fontStyles';
@@ -55,8 +55,14 @@ function OnboardingPaywallPanel({
   isDev,
   colors,
   design,
+  theme: themeProp,
 }: OnboardingPaywallPanelProps) {
-  const { theme } = useTheme();
+  const { theme: contextTheme } = useTheme();
+
+  const theme = useMemo(() => {
+    return resolveTheme(themeProp, contextTheme, 'dark');
+  }, [contextTheme, themeProp]);
+
   const insets = useSafeAreaInsets();
   const styles = useMemo(
     () => createStyles(theme, colors, !!image, insets),

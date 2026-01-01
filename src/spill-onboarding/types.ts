@@ -330,6 +330,8 @@ export interface OnboardingPaywallPanelProps {
    */
   products?: PaywallProductConfig[];
 
+  /** Theme colors to use for styling. */
+  theme?: 'dark' | 'light';
   /**
    * Button content. Either a simple string label or a render function.
    */
