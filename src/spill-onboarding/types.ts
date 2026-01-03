@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageSourcePropType, StyleProp, ImageStyle } from 'react-native';
 import type {
   PurchaseError,
   ProductPurchase,
@@ -111,6 +111,8 @@ export interface OnboardingIntroPanelProps {
 
   /** Optional image shown on the intro panel. */
   image?: ImageSourcePropType | (() => ReactNode);
+  /** Optional image style to override default sizing. */
+  propimageStyle?: StyleProp<ImageStyle>;
 }
 
 type OnboardingStepDefault = {
@@ -132,8 +134,11 @@ type OnboardingStepDefault = {
   /** Image displayed alongside the step content. */
   image: ImageSourcePropType;
 
-  /** Placement of the image relative to content. */
-  position: 'top' | 'bottom';
+  /** Optional image style to override default sizing. */
+  propimageStyle?: StyleProp<ImageStyle>;
+
+  /** Optional position of the content panel. */
+  position?: 'top' | 'bottom';
 
   /** Optional: Override global showBackButton for this step */
   showBackButton?: boolean;
@@ -158,8 +163,11 @@ type OnboardingStepCustom = {
   /** Image displayed alongside the custom step. */
   image: ImageSourcePropType;
 
-  /** Placement of the image relative to content. */
-  position: 'top' | 'bottom';
+  /** Optional image style to override default sizing. */
+  propimageStyle?: StyleProp<ImageStyle>;
+
+  /** Optional position of the content panel. */
+  position?: 'top' | 'bottom';
 };
 
 /**

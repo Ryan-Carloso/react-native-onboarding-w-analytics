@@ -76,14 +76,13 @@ function MyOnboarding() {
           description: 'This is the first step of your journey',
           buttonLabel: 'Next',
           image: require('./assets/step1.png'),
-          position: 'top',
         },
         {
           title: 'Step 2',
           description: 'Learn about our amazing features',
           buttonLabel: 'Continue',
           image: require('./assets/step2.png'),
-          position: 'bottom',
+          
         },
       ]}
       onComplete={() => {
@@ -134,7 +133,7 @@ function CustomCloseButton({ onPress }: { onPress: () => void }) {
     {
       component: CustomStep,
       image: require('./assets/step1.png'),
-      position: 'top',
+      
     },
     // ... more steps
   ]}
@@ -192,7 +191,7 @@ Each step can be either a default text-based step or a fully custom component:
   description: "Link your account to get started",
   buttonLabel: "Connect",
   image: require('./assets/step1.png'),
-  position: 'top'
+  
 }
 
 // Custom step component
@@ -206,7 +205,7 @@ Each step can be either a default text-based step or a fully custom component:
     />
   ),
   image: require('./assets/step2.png'),
-  position: 'bottom'
+  
 }
 ```
 
@@ -540,14 +539,14 @@ function MyOnboarding() {
           description: 'This is the first step of your journey',
           buttonLabel: 'Next',
           image: require('./assets/step1.png'),
-          position: 'top',
+          
         },
         {
           title: 'Step 2',
           description: 'Learn about our amazing features',
           buttonLabel: 'Continue',
           image: require('./assets/step2.png'),
-          position: 'bottom',
+          
         },
       ]}
       onComplete={() => {
@@ -598,7 +597,7 @@ function CustomCloseButton({ onPress }: { onPress: () => void }) {
     {
       component: CustomStep,
       image: require('./assets/step1.png'),
-      position: 'top',
+      
     },
     // ... more steps
   ]}
@@ -656,7 +655,7 @@ Each step can be either a default text-based step or a fully custom component:
   description: "Link your account to get started",
   buttonLabel: "Connect",
   image: require('./assets/step1.png'),
-  position: 'top'
+  
 }
 
 // Custom step component
@@ -670,7 +669,7 @@ Each step can be either a default text-based step or a fully custom component:
     />
   ),
   image: require('./assets/step2.png'),
-  position: 'bottom'
+  
 }
 ```
 

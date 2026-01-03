@@ -269,13 +269,24 @@ function SpillOnboarding({
       <OnboardingImageContainer
         currentStep={currentStep}
         currentStepImage={currentStepImage}
-        position={currentStep?.position ?? firstStep?.position ?? 'top'}
         animationDuration={animationDuration}
         backgroundSpillProgress={backgroundSpillProgress}
         screenHeight={screen.height}
         introPanel={introPanel}
         stepPanel={stepPanel}
         background={background}
+        propimageStyle={
+          typeof introPanelProps !== 'function'
+            ? introPanelProps.propimageStyle
+            : undefined
+        }
+        // If introPanel.image is a function, do NOT render it in ImageContainer
+        // because it's already rendered in OnboardingIntroPanel
+        hideImage={
+          !currentStep &&
+          typeof introPanelProps !== 'function' &&
+          typeof introPanelProps.image === 'function'
+        }
       />
 
       {isPaywall ? (

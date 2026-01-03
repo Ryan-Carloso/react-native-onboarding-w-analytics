@@ -71,6 +71,7 @@ const createStyles = (theme: Theme) =>
       bottom: 0,
       left: 0,
       right: 0,
+      zIndex: 1, // Reduced from 10 to 1, to allow easier layering control
     },
     close: {
       position: 'absolute',

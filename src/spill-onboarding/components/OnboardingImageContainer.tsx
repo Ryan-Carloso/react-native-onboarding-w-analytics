@@ -21,29 +21,32 @@ import useMeasureHeight from '../hooks/useMeasureHeight';
 import type { Theme } from '../../utils/theme';
 import type { OnboardingStep } from '../types';
 import { ExpoImage } from '../adapters/expo-image';
+import type { StyleProp, ImageStyle } from 'react-native';
 
 interface OnboardingImageContainerProps {
   currentStep: OnboardingStep | undefined;
   currentStepImage: ImageSourcePropType | undefined;
-  position: 'top' | 'bottom';
   animationDuration: number;
   backgroundSpillProgress: SharedValue<number>;
   introPanel: any;
   stepPanel: any;
   screenHeight: number;
   background?: () => ReactNode;
+  propimageStyle?: StyleProp<ImageStyle>;
+  hideImage?: boolean;
 }
 
 function OnboardingImageContainer({
   currentStep,
   currentStepImage,
-  position,
   animationDuration,
   backgroundSpillProgress,
   introPanel,
   stepPanel,
   screenHeight,
   background,
+  propimageStyle,
+  hideImage,
 }: OnboardingImageContainerProps) {
   const { theme } = useTheme();
   const image = useMeasureHeight();
@@ -70,18 +73,7 @@ function OnboardingImageContainer({
   }));
 
   const imageTargetY = useDerivedValue(() => {
-    const topSafe = theme.insets.top + extraPadding + 16;
-
-    if (position === 'top') {
-      return topSafe;
-    }
-
-    const imageH = image.height || 0;
-    const modalTop = screenHeight - bottomPanelHeight - 16;
-    const yBottom = modalTop - imageH;
-
-    const shouldClampTop = !currentStep;
-    return shouldClampTop ? Math.max(yBottom, topSafe) : yBottom;
+    return theme.insets.top + extraPadding + 16;
   });
 
   const hasMounted = useSharedValue(false);
@@ -130,7 +122,7 @@ function OnboardingImageContainer({
         <Animated.View style={[styles.colorBg, backgroundAnimation]} />
       )}
 
-      {currentStepImage && (
+      {currentStepImage && !hideImage && (
         <Animated.View style={[styles.imageWrapper, imageWrapperAnimation]}>
           <Animated.View style={[styles.image, imageAnimation]} ref={image.ref}>
             {ExpoImage ? (
@@ -138,14 +130,20 @@ function OnboardingImageContainer({
                 source={currentStepImage as ExpoImageProps['source']}
                 contentFit="contain"
                 transition={0}
-                style={styles.imageStyle}
+                style={[
+                  styles.imageStyle,
+                  currentStep?.propimageStyle || propimageStyle,
+                ]}
               />
             ) : (
               <Image
                 source={currentStepImage}
                 resizeMode="contain"
                 fadeDuration={0}
-                style={styles.imageStyle}
+                style={[
+                  styles.imageStyle,
+                  currentStep?.propimageStyle || propimageStyle,
+                ]}
               />
             )}
           </Animated.View>
@@ -164,19 +162,17 @@ const createStyles = (theme: Theme) =>
       overflow: 'hidden',
     },
     imageWrapper: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      overflow: 'hidden',
+      position: 'relative',
+      overflow: 'visible',
     },
     image: {
       alignSelf: 'center',
       alignItems: 'center',
-      overflow: 'hidden',
+      width: '100%',
+      height: '100%',
     },
     imageStyle: {
-      width: 300,
-      height: 600,
+      width: '100%',
+      height: '100%',
     },
   });

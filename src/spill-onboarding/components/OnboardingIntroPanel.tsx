@@ -12,6 +12,7 @@ function OnboardingIntroPanel({
   subtitle,
   button,
   image,
+  propimageStyle,
 }: OnboardingIntroPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -58,9 +59,16 @@ function OnboardingIntroPanel({
 
   return (
     <View style={styles.container}>
-      {typeof image === 'function'
-        ? image()
-        : image && <Image source={image} style={styles.image} />}
+      {/* If it's a function, render it directly. If it's a static source, render an Image. */}
+      {typeof image === 'function' ? (
+        image()
+      ) : image ? (
+        <Image
+          source={image}
+          style={[styles.image, propimageStyle]}
+          resizeMode="contain"
+        />
+      ) : null}
       <View style={styles.textContainer}>
         {renderTitle()}
         {renderSubtitle()}
@@ -79,6 +87,9 @@ const createStyles = (theme: Theme) =>
     },
     image: {
       alignSelf: 'center',
+      width: '100%',
+      height: 200,
+      zIndex: 1,
     },
     textContainer: {
       alignItems: 'center',
