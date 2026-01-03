@@ -1,6 +1,6 @@
 {
   "name": "rn-onboarding-analytics",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "Onboarding/tutorial flow for React Native with analytics.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
