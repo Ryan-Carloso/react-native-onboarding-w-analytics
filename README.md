@@ -28,7 +28,7 @@ npm install rn-onboarding-analytics
 The library requires these dependencies :
 
 ```sh
-npm install react-native-reanimated react-native-safe-area-context expo-constants expo-localization react-native-iap
+npm install react-native-reanimated react-native-safe-area-context expo-constants expo-localization
 
 ```
 

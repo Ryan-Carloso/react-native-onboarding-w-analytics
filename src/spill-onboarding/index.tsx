@@ -307,7 +307,7 @@ function SpillOnboarding({
   );
 
   const onboardingContent = (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.flex1}>
       <GestureDetector gesture={panGesture}>
         <View style={styles.container} ref={screen.ref}>
           <View ref={introPanel.ref} style={styles.bottomPanel}>

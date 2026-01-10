@@ -21,7 +21,6 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-iap": "^14.6.3",
     "react-native-nitro-modules": "^0.32.0",
     "react-native-reanimated": "~4.1.2",
     "react-native-safe-area-context": "^5.6.1",
