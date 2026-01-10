@@ -95,7 +95,6 @@
     "expo-image": "*",
     "react": "*",
     "react-native": "*",
-    "react-native-iap": "*",
     "react-native-reanimated": "*",
     "react-native-safe-area-context": "*",
     "react-native-svg": "*"

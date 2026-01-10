@@ -1,15 +1,20 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   type ImageSourcePropType,
   View,
   BackHandler,
   Platform,
   StyleSheet,
+  Alert,
 } from 'react-native';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 import { useTheme } from '../utils/ThemeContext';
 import OnboardingIntroPanel from './components/OnboardingIntroPanel';
-import OnboardingPaywallPanel from './components/OnboardingPaywallPanel';
-import { useSharedValue, withTiming } from 'react-native-reanimated';
+import { useSharedValue, withTiming, runOnJS } from 'react-native-reanimated';
 import OnboardingStepPanel from './components/OnboardingStepPanel';
 import OnboardingStepContainer from './components/OnboardingStepContainer';
 import OnboardingImageContainer from './components/OnboardingImageContainer';
@@ -33,9 +38,7 @@ function SpillOnboarding({
   skipButton,
   apiKey,
   isDev,
-  paywallPanel: paywallPanelProps,
   backButtonIcon,
-  colors,
 }: OnboardingProps) {
   const { theme } = useTheme();
   const logDev = useLogDev(!!isDev);
@@ -44,18 +47,20 @@ function SpillOnboarding({
   const backgroundSpillProgress = useSharedValue(0);
 
   const [step, setStep] = useState(-1);
+  const stepRef = useRef(step);
+
+  useEffect(() => {
+    stepRef.current = step;
+  }, [step]);
+
   const currentStep = step >= 0 ? steps[step] : undefined;
   const firstStep = steps[0];
-  const isPaywall = step === steps.length;
 
   const onStepChange = useCallback(
     (stepNumber: number) => {
       const getStepName = (index: number) => {
         if (index === -1) {
           return 'Intro';
-        }
-        if (index === steps.length) {
-          return 'Paywall';
         }
         const s = steps[index];
         if (!s) {
@@ -124,29 +129,25 @@ function SpillOnboarding({
   const stepPanel = useMeasureHeight();
   const screen = useMeasureHeight();
 
-  const onPressStart = () => {
+  const onPressStart = useCallback(() => {
     backgroundSpillProgress.set(
       withTiming(1, {
         duration: animationDuration,
       })
     );
     onStepChange(0);
-  };
+  }, [backgroundSpillProgress, animationDuration, onStepChange]);
 
-  const onNextPress = () => {
+  const onNextPress = useCallback(() => {
     if (step === steps.length - 1) {
-      if (paywallPanelProps) {
-        onStepChange(steps.length);
-        return;
-      }
       trackEvent(apiKey, 'complete', {}, isDev);
       return onComplete();
     }
 
     onStepChange(step + 1);
-  };
+  }, [step, steps.length, apiKey, isDev, onComplete, onStepChange]);
 
-  const onBackPress = () => {
+  const onBackPress = useCallback(() => {
     if (step === 0) {
       backgroundSpillProgress.set(
         withTiming(0, {
@@ -159,7 +160,7 @@ function SpillOnboarding({
     }
 
     onStepChange(step - 1);
-  };
+  }, [step, backgroundSpillProgress, animationDuration, onStepChange]);
 
   const renderIntroPanel = () => {
     if (typeof introPanelProps === 'function') {
@@ -177,38 +178,6 @@ function SpillOnboarding({
             ? introPanelProps.image
             : undefined
         }
-      />
-    );
-  };
-
-  const onPaywallContinue = (planId: string) => {
-    trackEvent(apiKey, 'paywall_select', { plan_id: planId }, isDev);
-    trackEvent(apiKey, 'complete', { plan_id: planId }, isDev);
-    onComplete(planId);
-  };
-
-  const renderPaywallPanel = () => {
-    if (!paywallPanelProps) return null;
-
-    if (typeof paywallPanelProps === 'function') {
-      return paywallPanelProps({ onPressContinue: onPaywallContinue });
-    }
-
-    const { onPressContinue, onClose, ...otherProps } = paywallPanelProps;
-
-    // Use the provided onPressContinue if available, otherwise use default
-    const handleContinue = onPressContinue || onPaywallContinue;
-    // Use provided onClose or fallback to onSkip
-    const handleClose = onClose || (() => onSkip?.());
-
-    return (
-      <OnboardingPaywallPanel
-        onPressContinue={handleContinue}
-        onClose={handleClose}
-        apiKey={apiKey}
-        isDev={isDev}
-        colors={colors}
-        {...otherProps}
       />
     );
   };
@@ -241,11 +210,6 @@ function SpillOnboarding({
   };
 
   const currentStepImage: ImageSourcePropType | undefined = useMemo(() => {
-    if (isPaywall) {
-      // Paywall image is rendered inside the panel scrollview
-      return undefined;
-    }
-
     if (!currentStep) {
       if (
         typeof introPanelProps !== 'function' &&
@@ -258,50 +222,132 @@ function SpillOnboarding({
     }
 
     return currentStep.image;
-  }, [currentStep, firstStep?.image, isPaywall, introPanelProps]);
+  }, [currentStep, firstStep?.image, introPanelProps]);
+
+  const handleSwipeAdvance = useCallback(() => {
+    if (step === -1) {
+      onPressStart();
+    } else {
+      onNextPress();
+    }
+  }, [step, onPressStart, onNextPress]);
+
+  const handleSwipeReturn = useCallback(() => {
+    if (step === -1) return;
+    onBackPress();
+  }, [step, onBackPress]);
+
+  const processSwipe = useCallback(
+    (direction: 'left' | 'right') => {
+      const timestamp = new Date().toISOString();
+      const currentStepIndex = stepRef.current;
+
+      let allowed = true;
+      let restrictionReason = '';
+
+      // Determine constraints
+      if (direction === 'left' && currentStepIndex <= 0) {
+        allowed = false;
+        restrictionReason = 'Blocked left swipe: Already at first item';
+      } else if (
+        direction === 'right' &&
+        currentStepIndex === steps.length - 1
+      ) {
+        allowed = false;
+        restrictionReason = 'Blocked right swipe: Reached last item';
+      }
+
+      const debugMsg = `Step: ${currentStepIndex}\nDirection: ${direction}\nAllowed: ${allowed}\nReason: ${restrictionReason}`;
+      console.log('Swipe Debug:', debugMsg);
+      Alert.alert('Swipe Debug', debugMsg);
+
+      logDev('Swipe Gesture:', {
+        timestamp,
+        currentIndex: currentStepIndex,
+        direction,
+        allowed,
+        restrictionReason: restrictionReason || 'None',
+      });
+
+      if (!allowed) {
+        return;
+      }
+
+      if (direction === 'right') {
+        handleSwipeAdvance();
+      } else {
+        handleSwipeReturn();
+      }
+    },
+    [steps.length, logDev, handleSwipeAdvance, handleSwipeReturn]
+  );
+
+  const panGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX([-20, 20])
+        .onEnd((e) => {
+          const { translationX, velocityX } = e;
+          const threshold = 50;
+          const velocityThreshold = 500;
+
+          if (
+            translationX > threshold ||
+            (translationX > 20 && velocityX > velocityThreshold)
+          ) {
+            runOnJS(processSwipe)('right');
+          } else if (
+            translationX < -threshold ||
+            (translationX < -20 && velocityX < -velocityThreshold)
+          ) {
+            runOnJS(processSwipe)('left');
+          }
+        }),
+    [processSwipe]
+  );
 
   const onboardingContent = (
-    <View style={styles.container} ref={screen.ref}>
-      <View ref={introPanel.ref} style={styles.bottomPanel}>
-        {renderIntroPanel()}
-      </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureDetector gesture={panGesture}>
+        <View style={styles.container} ref={screen.ref}>
+          <View ref={introPanel.ref} style={styles.bottomPanel}>
+            {renderIntroPanel()}
+          </View>
 
-      <OnboardingImageContainer
-        currentStep={currentStep}
-        currentStepImage={currentStepImage}
-        animationDuration={animationDuration}
-        backgroundSpillProgress={backgroundSpillProgress}
-        screenHeight={screen.height}
-        introPanel={introPanel}
-        stepPanel={stepPanel}
-        background={background}
-        propimageStyle={
-          typeof introPanelProps !== 'function'
-            ? introPanelProps.propimageStyle
-            : undefined
-        }
-        // If introPanel.image is a function, do NOT render it in ImageContainer
-        // because it's already rendered in OnboardingIntroPanel
-        hideImage={
-          !currentStep &&
-          typeof introPanelProps !== 'function' &&
-          typeof introPanelProps.image === 'function'
-        }
-      />
+          <OnboardingImageContainer
+            currentStep={currentStep}
+            currentStepImage={currentStepImage}
+            animationDuration={animationDuration}
+            backgroundSpillProgress={backgroundSpillProgress}
+            screenHeight={screen.height}
+            introPanel={introPanel}
+            stepPanel={stepPanel}
+            background={background}
+            propimageStyle={
+              typeof introPanelProps !== 'function'
+                ? introPanelProps.propimageStyle
+                : undefined
+            }
+            // If introPanel.image is a function, do NOT render it in ImageContainer
+            // because it's already rendered in OnboardingIntroPanel
+            hideImage={
+              !currentStep &&
+              typeof introPanelProps !== 'function' &&
+              typeof introPanelProps.image === 'function'
+            }
+          />
 
-      {isPaywall ? (
-        <View style={styles.fullScreenPanel}>{renderPaywallPanel()}</View>
-      ) : (
-        <OnboardingStepContainer
-          currentStep={currentStep}
-          animationDuration={animationDuration}
-          renderStepContent={renderStepContent}
-          onSkip={onSkip}
-          ref={stepPanel.ref}
-          skipButton={skipButton}
-        />
-      )}
-    </View>
+          <OnboardingStepContainer
+            currentStep={currentStep}
+            animationDuration={animationDuration}
+            renderStepContent={renderStepContent}
+            onSkip={onSkip}
+            ref={stepPanel.ref}
+            skipButton={skipButton}
+          />
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 
   // On web, wrap in modal; on mobile, render directly
@@ -318,6 +364,9 @@ export default SpillOnboarding;
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
+    flex1: {
+      flex: 1,
+    },
     container: {
       flex: 1,
       backgroundColor: theme.bg.secondary,
