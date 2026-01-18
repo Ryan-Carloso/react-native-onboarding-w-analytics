@@ -118,9 +118,9 @@ function OnboardingImageContainer({
         <Animated.View style={backgroundAnimation}>
           {background()}
         </Animated.View>
-      ) : (
+      ) : currentStep ? (
         <Animated.View style={[styles.colorBg, backgroundAnimation]} />
-      )}
+      ) : null}
 
       {currentStepImage && !hideImage && (
         <Animated.View style={[styles.imageWrapper, imageWrapperAnimation]}>

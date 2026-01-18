@@ -12,17 +12,19 @@ import type { Theme } from '../../utils/theme';
 interface OnboardingModalProps {
   onSkip?: () => void;
   children: React.ReactNode;
+  isIntro?: boolean;
 }
 
 export default function OnboardingModal({
   onSkip,
   children,
+  isIntro,
 }: OnboardingModalProps) {
   const { theme } = useTheme();
   const { height, width } = useWindowDimensions();
   const styles = useMemo(
-    () => createStyles(theme, height, width),
-    [height, width, theme]
+    () => createStyles(theme, height, width, isIntro),
+    [height, width, theme, isIntro]
   );
 
   return (
@@ -39,11 +41,16 @@ export default function OnboardingModal({
   );
 }
 
-const createStyles = (theme: Theme, height: number, width: number) =>
+const createStyles = (
+  theme: Theme,
+  height: number,
+  width: number,
+  isIntro?: boolean
+) =>
   StyleSheet.create({
     webOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: isIntro ? 'transparent' : 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -66,7 +73,7 @@ const createStyles = (theme: Theme, height: number, width: number) =>
       shadowOpacity: 0.25,
       shadowRadius: 20,
       overflow: 'hidden',
-      backgroundColor: theme.bg.secondary,
+      backgroundColor: isIntro ? 'transparent' : theme.bg.secondary,
     },
     webContent: {
       flex: 1,
