@@ -9,7 +9,7 @@ const API_URL = 'https://api.freesupabase.shop/api/track';
 export const trackEvent = async (
   apiKey: string | undefined,
   eventType: string,
-  metaData: any = {},
+  metaData: Record<string, unknown> = {},
   isDev: boolean = false
 ) => {
   const appName =

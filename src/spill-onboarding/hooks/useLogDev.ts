@@ -4,7 +4,11 @@ import { useCallback } from 'react';
  * Helper function to log messages with the Dev Mode prefix.
  * Can be used outside of React components.
  */
-export const logDevMessage = (isDev: boolean, message: string, data?: any) => {
+export const logDevMessage = (
+  isDev: boolean,
+  message: string,
+  data?: unknown
+) => {
   if (isDev) {
     if (data) {
       console.log(`🚧 [Dev Mode] ${message}`, JSON.stringify(data, null, 2));
@@ -16,7 +20,7 @@ export const logDevMessage = (isDev: boolean, message: string, data?: any) => {
 
 export const useLogDev = (isDev: boolean) => {
   const log = useCallback(
-    (message: string, data?: any) => {
+    (message: string, data?: unknown) => {
       logDevMessage(isDev, message, data);
     },
     [isDev]

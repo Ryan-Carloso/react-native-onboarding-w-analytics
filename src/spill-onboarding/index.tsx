@@ -5,7 +5,6 @@ import {
   BackHandler,
   Platform,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import {
   Gesture,
@@ -19,6 +18,7 @@ import OnboardingStepPanel from './components/OnboardingStepPanel';
 import OnboardingStepContainer from './components/OnboardingStepContainer';
 import OnboardingImageContainer from './components/OnboardingImageContainer';
 import OnboardingModal from './components/OnboardingModal';
+import PaginationDots from './components/PaginationDots';
 import { type OnboardingProps } from './types';
 import useMeasureHeight from './hooks/useMeasureHeight';
 import { type Theme } from '../utils/theme';
@@ -162,9 +162,39 @@ function SpillOnboarding({
     onStepChange(step - 1);
   }, [step, backgroundSpillProgress, animationDuration, onStepChange]);
 
+  const handleDotPress = useCallback(
+    (index: number) => {
+      if (index === step) return;
+
+      if (index === -1) {
+        backgroundSpillProgress.set(
+          withTiming(0, {
+            duration: animationDuration,
+          })
+        );
+      } else {
+        backgroundSpillProgress.set(
+          withTiming(1, {
+            duration: animationDuration,
+          })
+        );
+      }
+      onStepChange(index);
+    },
+    [step, backgroundSpillProgress, animationDuration, onStepChange]
+  );
+
   const renderIntroPanel = () => {
+    const paginationDots = (
+      <PaginationDots
+        totalSteps={steps.length + 1}
+        currentStepIndex={step}
+        onDotPress={handleDotPress}
+      />
+    );
+
     if (typeof introPanelProps === 'function') {
-      return introPanelProps({ onPressStart });
+      return introPanelProps({ onPressStart, paginationDots });
     }
 
     return (
@@ -178,6 +208,7 @@ function SpillOnboarding({
             ? introPanelProps.image
             : undefined
         }
+        paginationDots={paginationDots}
       />
     );
   };
@@ -186,11 +217,21 @@ function SpillOnboarding({
     if (!currentStep) {
       return null;
     }
+
+    const paginationDots = (
+      <PaginationDots
+        totalSteps={steps.length + 1}
+        currentStepIndex={step}
+        onDotPress={handleDotPress}
+      />
+    );
+
     if (typeof currentStep.component === 'function') {
       return currentStep.component({
         onNext: onNextPress,
         onBack: onBackPress,
         isLast: step === steps.length - 1,
+        paginationDots: paginationDots,
       });
     }
 
@@ -205,6 +246,7 @@ function SpillOnboarding({
         buttonPrimary={false}
         showBackButton={currentStep.showBackButton ?? showBackButton}
         backButtonIcon={currentStep.backButtonIcon ?? backButtonIcon}
+        paginationDots={paginationDots}
       />
     );
   };
@@ -239,35 +281,7 @@ function SpillOnboarding({
 
   const processSwipe = useCallback(
     (direction: 'left' | 'right') => {
-      const timestamp = new Date().toISOString();
-      const currentStepIndex = stepRef.current;
-
       let allowed = true;
-      let restrictionReason = '';
-
-      // Determine constraints
-      if (direction === 'left' && currentStepIndex <= 0) {
-        allowed = false;
-        restrictionReason = 'Blocked left swipe: Already at first item';
-      } else if (
-        direction === 'right' &&
-        currentStepIndex === steps.length - 1
-      ) {
-        allowed = false;
-        restrictionReason = 'Blocked right swipe: Reached last item';
-      }
-
-      const debugMsg = `Step: ${currentStepIndex}\nDirection: ${direction}\nAllowed: ${allowed}\nReason: ${restrictionReason}`;
-      console.log('Swipe Debug:', debugMsg);
-      Alert.alert('Swipe Debug', debugMsg);
-
-      logDev('Swipe Gesture:', {
-        timestamp,
-        currentIndex: currentStepIndex,
-        direction,
-        allowed,
-        restrictionReason: restrictionReason || 'None',
-      });
 
       if (!allowed) {
         return;
@@ -279,7 +293,7 @@ function SpillOnboarding({
         handleSwipeReturn();
       }
     },
-    [steps.length, logDev, handleSwipeAdvance, handleSwipeReturn]
+    [handleSwipeAdvance, handleSwipeReturn]
   );
 
   const panGesture = useMemo(
@@ -295,12 +309,12 @@ function SpillOnboarding({
             translationX > threshold ||
             (translationX > 20 && velocityX > velocityThreshold)
           ) {
-            runOnJS(processSwipe)('right');
+            runOnJS(processSwipe)('left');
           } else if (
             translationX < -threshold ||
             (translationX < -20 && velocityX < -velocityThreshold)
           ) {
-            runOnJS(processSwipe)('left');
+            runOnJS(processSwipe)('right');
           }
         }),
     [processSwipe]

@@ -17,19 +17,24 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useTheme } from '../../utils/ThemeContext';
-import useMeasureHeight from '../hooks/useMeasureHeight';
+import useMeasureHeight, { type ViewRef } from '../hooks/useMeasureHeight';
 import type { Theme } from '../../utils/theme';
 import type { OnboardingStep } from '../types';
 import { ExpoImage } from '../adapters/expo-image';
 import type { StyleProp, ImageStyle } from 'react-native';
+
+interface MeasuredPanel {
+  ref: React.RefObject<ViewRef | null>;
+  height: number;
+}
 
 interface OnboardingImageContainerProps {
   currentStep: OnboardingStep | undefined;
   currentStepImage: ImageSourcePropType | undefined;
   animationDuration: number;
   backgroundSpillProgress: SharedValue<number>;
-  introPanel: any;
-  stepPanel: any;
+  introPanel: MeasuredPanel;
+  stepPanel: MeasuredPanel;
   screenHeight: number;
   background?: () => ReactNode;
   propimageStyle?: StyleProp<ImageStyle>;
@@ -69,10 +74,23 @@ function OnboardingImageContainer({
   );
 
   const imageWrapperAnimation = useAnimatedStyle(() => ({
-    height: imageWrapperHeight.value,
+    // The wrapper stays full screen, but we might want to adjust its zIndex or opacity
+    opacity: 1,
   }));
 
   const imageTargetY = useDerivedValue(() => {
+    // If we have a step panel, we want to center the image in the space above it
+    // but below the top safe area.
+    const availableHeight =
+      screenHeight - bottomPanelHeight - theme.insets.top - extraPadding;
+    if (availableHeight > 0 && image.height > 0) {
+      // Center it in available space, but ensure it doesn't go above safe area
+      return (
+        theme.insets.top +
+        extraPadding +
+        Math.max((availableHeight - image.height) / 2, 0)
+      );
+    }
     return theme.insets.top + extraPadding + 16;
   });
 
@@ -87,13 +105,15 @@ function OnboardingImageContainer({
       },
       () => (hasMounted.value = true)
     );
-    const sideEdges = Math.max(32 + 24 - backgroundSpillDistance.value, 0);
-
+    // We reduce this to 0 when backgroundSpillProgress is 1 to allow the image to be bigger.
+    // Removed unused sideEdges as per user request for bigger images
     return {
       transform: [{ translateY }],
-      maxWidth: screenWidth - sideEdges,
+      maxWidth: screenWidth, // Removed sideEdges to allow full width
+      maxHeight:
+        screenHeight - bottomPanelHeight - (theme.insets.top + extraPadding), // Increased maxHeight
     };
-  }, [animationDuration]);
+  }, [animationDuration, screenWidth, screenHeight, bottomPanelHeight]);
 
   const backgroundAnimation = useAnimatedStyle(() => {
     const topEdge = Math.max(
@@ -162,14 +182,20 @@ const createStyles = (theme: Theme) =>
       overflow: 'hidden',
     },
     imageWrapper: {
-      position: 'relative',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
       overflow: 'visible',
+      zIndex: 5,
     },
     image: {
       alignSelf: 'center',
       alignItems: 'center',
       width: '100%',
       height: '100%',
+      zIndex: 10, // Ensure image is above background
     },
     imageStyle: {
       width: '100%',

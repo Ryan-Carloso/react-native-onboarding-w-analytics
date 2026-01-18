@@ -10,6 +10,7 @@ import SkipButton from '../buttons/SkipButton';
 import { useTheme } from '../../utils/ThemeContext';
 import type { Theme } from '../../utils/theme';
 import type { OnboardingStep } from '../types';
+import type { ViewRef } from '../hooks/useMeasureHeight';
 
 interface OnboardingStepContainerProps {
   currentStep: OnboardingStep | undefined;
@@ -19,7 +20,10 @@ interface OnboardingStepContainerProps {
   skipButton?: ({ onPress }: { onPress: () => void }) => ReactNode;
 }
 
-const OnboardingStepContainer = forwardRef<any, OnboardingStepContainerProps>(
+const OnboardingStepContainer = forwardRef<
+  ViewRef,
+  OnboardingStepContainerProps
+>(
   (
     { currentStep, animationDuration, onSkip, renderStepContent, skipButton },
     ref

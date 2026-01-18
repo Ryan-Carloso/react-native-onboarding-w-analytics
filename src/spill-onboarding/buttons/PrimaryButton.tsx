@@ -57,6 +57,7 @@ const createStyles = (theme: Theme, disabled: boolean) =>
       paddingHorizontal: 10,
       justifyContent: 'center',
       alignItems: 'center',
+      marginTop: 12,
       backgroundColor: theme.bg.primary,
       opacity: disabled ? 0.4 : 1,
       flexDirection: 'row',

@@ -13,6 +13,7 @@ function OnboardingIntroPanel({
   button,
   image,
   propimageStyle,
+  paginationDots,
 }: OnboardingIntroPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -73,6 +74,7 @@ function OnboardingIntroPanel({
         {renderTitle()}
         {renderSubtitle()}
       </View>
+      {paginationDots}
       {renderButton()}
     </View>
   );

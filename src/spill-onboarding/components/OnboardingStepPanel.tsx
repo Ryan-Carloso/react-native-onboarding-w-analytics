@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../utils/ThemeContext';
 import { type Theme } from '../../utils/theme';
@@ -17,7 +17,8 @@ function OnboardingStepPanel({
   buttonPrimary,
   showBackButton = true,
   backButtonIcon,
-}: OnboardingStepPanelProps & { backButtonIcon?: ReactNode }) {
+  paginationDots,
+}: OnboardingStepPanelProps) {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -32,6 +33,9 @@ function OnboardingStepPanel({
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
       </View>
+
+      {paginationDots}
+
       <View style={styles.buttonRow}>
         {onBackPress && showBackButton && (
           <View style={styles.backButton}>
@@ -99,7 +103,6 @@ const createStyles = (theme: Theme) =>
       textAlign: 'center',
       color: theme.text.secondary,
     },
-
     buttonRow: {
       flexDirection: 'row',
       gap: 8,

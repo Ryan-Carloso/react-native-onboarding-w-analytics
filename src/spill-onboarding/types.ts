@@ -108,6 +108,9 @@ export interface OnboardingIntroPanelProps {
   image?: ImageSourcePropType | (() => ReactNode);
   /** Optional image style to override default sizing. */
   propimageStyle?: StyleProp<ImageStyle>;
+
+  /** Optional pagination dots component to render at the bottom. */
+  paginationDots?: ReactNode;
 }
 
 type OnboardingStepDefault = {
@@ -153,6 +156,8 @@ type OnboardingStepCustom = {
     onBack: () => void;
     /** True if this is the last step. */
     isLast: boolean;
+    /** Optional pagination dots component to render at the bottom. */
+    paginationDots?: ReactNode;
   }) => ReactNode;
 
   /** Image displayed alongside the custom step. */
@@ -195,6 +200,9 @@ export interface OnboardingStepPanelProps {
   /** Whether the primary styling should be applied to the button. */
   buttonPrimary: boolean;
 
+  /** Optional pagination dots component to render at the bottom. */
+  paginationDots?: ReactNode;
+
   /** Controls visibility of the back button. */
   showBackButton?: boolean;
 
@@ -204,7 +212,13 @@ export interface OnboardingStepPanelProps {
 
 type OnboardingIntroPanel =
   | Omit<OnboardingIntroPanelProps, 'onPressStart'>
-  | (({ onPressStart }: { onPressStart: () => void }) => ReactNode);
+  | (({
+      onPressStart,
+      paginationDots,
+    }: {
+      onPressStart: () => void;
+      paginationDots?: ReactNode;
+    }) => ReactNode);
 
 /**
  * Top-level props for the `Onboarding` component.
